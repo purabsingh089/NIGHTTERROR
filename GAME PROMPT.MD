@@ -1,791 +1,1226 @@
-NIGHT TERROR
+NIGHTTERROR — MASTER GAME DEVELOPMENT & REFERENCE ANALYSIS PROMPT
 
-Game Design Document & Technical Production Plan
+Complete AI Agent Instructions for MonkeyCode AI
 
-Version: 1.0
-Platform: Android first
-Genre: Asymmetric Horror Survival / Strategy
-Camera: 2D Top-Down
-Art Direction: Dark Horror
-Match Format: 1 Hunter vs 7 Survivors
-Game Modes: Offline + Online
-Business Model: Free-to-play, cosmetic monetization
+You are the lead game architect, senior Godot developer, gameplay systems engineer, AI programmer, multiplayer engineer, UI/UX designer, QA engineer and technical project manager for NIGHTTERROR.
 
-Game Name "NIGHT TERROR"
+Your task is to build a real, complete, original Android horror-survival strategy game. You must inspect the supplied reference-game files and the existing GitHub repository before making major architectural decisions.
+
+This is an implementation project, not a concept-document project.
+
+Do not generate a fake prototype, static mockup, menu-only project, placeholder gameplay, simulated multiplayer or untested APK.
+
 ---
 
-1. Game Vision
+PART 1 — PROJECT IDENTITY
 
-Dream Hunter is a horror-survival game built around asymmetric gameplay.
+Official project name: NIGHTTERROR
 
-Every match creates two opposing experiences:
+Genre: Asymmetric horror survival and strategy
 
-- The Hunter experiences the thrill of tracking and hunting.
-- Survivors experience the tension of hiding, building defenses, cooperating and escaping.
+Primary platform: Android
 
-The game should combine:
+Camera: 2D top-down
 
-- Room-defense mechanics.
-- Real-time player-versus-player combat.
-- Character abilities.
-- Resource management.
-- Competitive progression.
-- Unlockable content.
-- Offline AI gameplay.
+Art direction: Original dark vector graphics
 
-The game should not be a direct copy of Haunted Dorm. It should have its own maps, characters, mechanics, art, identity and progression systems.
+Match format: 1 Hunter versus 7 Survivors
 
-2. Core Game Structure
+Development budget: ₹0 initially
 
-Match configuration
+Development approach: AI-assisted implementation, free/open-source tools and incremental testing.
 
-Setting| Value
-Total players| 8
-Hunters| 1
-Survivors| 7
-Camera| Top-down
-Match duration target| 6–10 minutes
-Platform| Android
-Online synchronization| Real-time
-Offline opponents| AI
+Tagline: One Hunter. Seven Survivors. No Escape.
 
-Match flow
+NIGHTTERROR takes inspiration from the strategic room-survival and defense gameplay of Haunted Dorm, but must become its own game with original characters, art, mechanics, maps, economy, progression, interface and identity.
 
-1. Players enter matchmaking.
-2. Eight players are assembled.
-3. One player is randomly selected as Hunter.
-4. Seven players become Survivors.
-5. Players enter the map.
-6. Survivors establish their defenses.
-7. The Hunter begins hunting.
-8. Both sides develop their abilities.
-9. The final survival phase begins.
-10. The match ends and rewards are distributed.
+Never use Haunted Dorm's name as the product identity.
 
-The matchmaking system should avoid assigning the same player as Hunter repeatedly when possible.
+PART 2 — REQUIRED INPUT INSPECTION
 
-3. Game Modes
+Before implementation, inspect both supplied inputs.
 
-A. Offline Mode
+A. Haunted Dorm reference archive
 
-Must work without internet access.
+The user has supplied a reference archive named:
 
-Features:
+"dynamic_game_haunted_dorm.zip"
 
-- Single-player matches.
-- AI-controlled Hunter.
-- AI-controlled Survivors.
-- Multiple difficulty settings.
-- Practice mode.
-- Offline challenges.
-- Local progression.
-- Local achievements.
-- Local match history.
+The archive contains game resources including:
 
-Offline AI should have different personalities and strategies.
+- JSON equipment data
+- Map grid data
+- Game configuration
+- UI prefab definitions
+- Character and animation resources
+- Image atlases
+- Audio files
+- English and other language resources
+- Compiled JavaScript and LayaAir runtime resources
 
-Example:
+Important reference files include:
 
-AI type| Behaviour
-Beginner| Basic resource collection
-Defensive| Focuses on upgrading doors
-Aggressive| Leaves rooms to collect resources
-Strategic| Prioritizes objectives
-Advanced| Adapts to Hunter behaviour
+- "gameAssets/asset/data/equipmentData.json"
+- "gameAssets/asset/data/mapsData.json"
+- "Languages/English.json"
+- "gameAssets/asset/Prefabs/StartGame.json"
+- "gameAssets/asset/Prefabs/BattleUI.json"
+- "gameAssets/asset/Prefabs/buildMenu.json"
+- "gameAssets/asset/Prefabs/GameOverUI.json"
+- "gameAssets/asset/config/netConfig.json"
+- "gameAssets/asset/game.js"
+- "gameAssets/asset/js/bundle.js" or the corresponding bundled JavaScript location
+- "minigame.js"
+- "index.html"
 
-The AI should not use perfect information. It must have realistic limitations and should not know survivor locations without valid tracking information.
+Inspect the real archive. Do not pretend it is available if it has not actually been uploaded into your workspace.
 
-B. Online Mode
+Reference analysis requirements
 
-Requires an internet connection.
+Extract and document:
 
-Features:
+1. Game startup and menu flow.
+2. Character and map selection.
+3. Match preparation and countdown.
+4. Player roles.
+5. Room selection and room occupancy.
+6. Bed mechanics.
+7. Currency generation.
+8. Door health and upgrades.
+9. Turret construction and progression.
+10. Mines and additional economy systems.
+11. Defensive equipment.
+12. Hunter skills and escalation.
+13. Player elimination and ghost-related mechanics.
+14. Match result handling.
+15. Equipment and character progression.
+16. Story maps and unlock systems.
+17. UI layout and mobile interaction patterns.
+18. Multiplayer indicators and networking clues.
+19. Audio and feedback systems.
+20. Any additional mechanics discoverable in the resources.
 
-- Real-time multiplayer.
+Use the following evidence labels in your report:
+
+- VERIFIED: directly supported by a readable file or executable observation.
+- STRONGLY INDICATED: supported by multiple related assets or data records.
+- HYPOTHESIS: plausible interpretation requiring runtime testing.
+- UNKNOWN: cannot be determined from available files.
+
+Do not invent formulas or behavior from asset names alone.
+
+The archive includes compiled JavaScript and configuration data. If code is minified, bundled, obfuscated or incomplete, explain the limitation. Never claim complete source-code understanding without evidence.
+
+Do not contact or attack the reference game's network servers. Do not extract credentials, bypass protections or attempt unauthorized access.
+
+B. Existing GitHub repository
+
+The user has an existing GitHub project that must be inspected.
+
+Ask for or locate the actual repository URL and inspect its current state.
+
+Do not assume that the repository is empty.
+
+Before modifying it, document:
+
+- Existing framework and engine.
+- Existing source structure.
+- Existing assets.
+- Existing dependencies.
+- Existing game systems.
+- Existing build configuration.
+- Existing tests.
+- Existing incomplete features.
+- Existing architectural problems.
+- Code that can safely be reused.
+- Code that should be refactored or replaced.
+
+Prefer upgrading the existing repository when practical. Do not unnecessarily rebuild everything.
+
+If the repository is inaccessible, report that as a blocker and request access or a repository ZIP.
+
+C. Important file-access rule
+
+Files attached to ChatGPT are not automatically accessible to MonkeyCode AI.
+
+The user must upload the reference ZIP and provide the repository URL or ZIP in the MonkeyCode workspace.
+
+Never claim to have analyzed an attachment that is not present in your own workspace.
+
+---
+
+PART 3 — REFERENCE GAMEPLAY UNDERSTANDING
+
+The reference archive provides evidence of a strategic loop built around room security, resource generation, construction, upgrades and surviving a pursuing Hunter.
+
+The English localization includes instructions explaining that players should:
+
+- Enter an empty room before the countdown ends.
+- Go to bed after entering.
+- Generate gold through sleeping and bed upgrades.
+- Build and upgrade turrets.
+- Upgrade room doors.
+- Repair a door when it is being attacked.
+- Avoid entering rooms after their lights go out.
+
+The equipment data contains examples of:
+
+- Beds with increasing income output.
+- Doors with increasing HP.
+- Turrets with increasing attack power and range.
+- Mines with resource output.
+- Game consoles with lightning-related output.
+- Traps and other defensive devices.
+- Repair and shield-related systems.
+- Turret modifiers for range, attack speed and other effects.
+
+The reference also contains labels for Quick, Catch, Berserk and Shock skills.
+
+Treat these as evidence about the reference game, not as mandatory NIGHTTERROR names or exact specifications.
+
+What NIGHTTERROR should learn from this design
+
+Preserve the strategic appeal:
+
+1. Players make an important early survival decision.
+2. Their initial location affects their strategy.
+3. They invest resources into future strength.
+4. Their defenses protect them while they develop.
+5. The Hunter applies pressure and forces adaptation.
+6. Players must decide when to upgrade, defend, cooperate or take risks.
+7. The match creates an escalating conflict rather than a static survival timer.
+
+What NIGHTTERROR must improve
+
+Do not make Survivors permanently camp in rooms.
+
+NIGHTTERROR must include meaningful reasons to leave protected areas:
+
+- Collect scattered resources.
+- Activate generators.
+- Find access keys.
+- Repair important systems.
+- Rescue teammates.
+- Unlock escape routes.
+- Complete optional objectives.
+- Gather information about the Hunter.
+- Coordinate team defense.
+
+A Survivor who remains in one room for the entire match should not automatically be following the optimal strategy.
+
+---
+
+PART 4 — ORIGINAL NIGHTTERROR GAME DESIGN
+
+Core premise
+
+A group of seven Survivors is trapped inside a hostile location controlled by a powerful supernatural Hunter.
+
+The Survivors must prepare defenses, manage resources, cooperate and complete objectives to escape.
+
+The Hunter must prevent the escape by tracking, pressuring and eliminating Survivors.
+
+The match is asymmetric: each side has different information, abilities, responsibilities and victory conditions.
+
+Main roles
+
+Survivors
+
+Seven players or AI-controlled characters.
+
+Their responsibilities:
+
+- Find a viable starting room.
+- Collect and manage resources.
+- Build defensive structures.
+- Upgrade equipment.
+- Complete objectives.
+- Avoid or delay the Hunter.
+- Assist teammates.
+- Unlock escape opportunities.
+- Escape before the match ends.
+
+Hunter
+
+One player or AI-controlled character.
+
+Responsibilities:
+
+- Search for Survivors.
+- Track suspicious activity.
+- Attack Survivors.
+- Break defensive structures.
+- Disrupt resource production.
+- Use special abilities.
+- Control important routes.
+- Prevent objectives from being completed.
+
+The Hunter must be powerful but not omniscient.
+
+PART 5 — MATCH FLOW
+
+Implement a clear match state machine.
+
+"LOBBY → ROLE_SELECTION → MATCH_LOADING → PREPARATION → ACTIVE_MATCH → ESCAPE_PHASE → RESULTS"
+
+Possible transitions include:
+
+- A Survivor is eliminated.
+- A Survivor is rescued if the chosen rules permit it.
+- A player disconnects.
+- The Hunter is temporarily disabled.
+- The escape objective is completed.
+- The match timer expires.
+
+The actual game must display the current phase and relevant objective information.
+
+Proposed initial match timing
+
+Use these values as balancing starting points, not unchangeable facts:
+
+- Preparation: 30–45 seconds.
+- Main match: approximately 6–10 minutes.
+- Escape phase: approximately 60–90 seconds.
+
+Run playtests and adjust based on actual match data.
+
+Victory conditions
+
+Survivors win when at least one eligible Survivor completes the final escape process.
+
+The Hunter wins when all Survivors are eliminated or the escape deadline expires without a successful escape.
+
+Define edge cases explicitly:
+
+- Simultaneous elimination and escape.
+- Disconnected players.
+- AI replacements.
+- A Survivor leaving during the final escape sequence.
+- Hunter disconnection.
+- Server interruption.
+
+All online results must be decided by the authoritative server.
+
+---
+
+PART 6 — SURVIVOR SYSTEMS
+
+A. Room selection
+
+Build an original room-based environment.
+
+Each room must support:
+
+- Entry and exit.
+- Door state.
+- Room occupancy.
+- Construction slots.
+- Defensive upgrades.
+- Resource interactions.
+- Optional room-specific benefits.
+
+Do not allow unlimited players to occupy the same protected room.
+
+Define room capacity and ownership rules.
+
+B. Resources
+
+Use three initial resource types:
+
+Energy
+
+- Main construction and upgrade resource.
+- Generated through appropriate infrastructure.
+
+Metal
+
+- Used for reinforced structures, repairs and advanced defenses.
+
+Dream Shards
+
+- Used for special abilities, rare upgrades or objective-related systems.
+
+All resource generation must be implemented through configurable data.
+
+Do not hardcode balance values throughout gameplay scripts.
+
+C. Bed and safe-room development
+
+Create an original NIGHTTERROR safe-room progression system.
+
+Possible progression:
+
+1. Emergency Cot.
+2. Reinforced Cot.
+3. Survival Bed.
+4. Rest Station.
+5. Advanced Dream Generator.
+
+Each tier should define:
+
+- Construction cost.
+- Upgrade cost.
+- Resource generation.
+- Upgrade time.
+- Power requirement.
+- Maximum tier.
+- Visual representation.
+
+The bed should not simply reproduce the reference game's item names or exact numerical progression.
+
+D. Door system
+
+Every room has a door with:
+
+- Current HP.
+- Maximum HP.
+- Upgrade tier.
+- Repair interaction.
+- Damage state.
+- Visual damage feedback.
+- Destruction state.
+
+Possible original progression:
+
+- Damaged Door.
+- Reinforced Door.
+- Steel Barrier.
+- Powered Barrier.
+- Nightmare Seal.
+
+The Hunter must have meaningful ways to attack doors.
+
+Doors must not become invulnerable through unlimited repair.
+
+E. Defensive construction
+
+Create configurable defensive structure types:
+
+- Auto Turret.
+- Slowdown Trap.
+- Detection Beacon.
+- Repair Station.
+- Energy Shield.
+- Healing Station.
+
+Each structure needs:
+
+- Cost.
+- Construction time.
+- Health.
+- Range.
+- Attack or effect behavior.
+- Upgrade tiers.
+- Targeting rules.
+- Power requirements where applicable.
+- Destruction and repair behavior.
+
+Structures must have functional behavior, not merely appear visually.
+
+F. Objectives
+
+Create multiple objective types:
+
+- Restore emergency power.
+- Recover access keys.
+- Activate security terminals.
+- Unlock a central exit.
+- Repair a communications device.
+- Retrieve an escape component.
+
+Objectives should require Survivors to leave their rooms and make meaningful decisions.
+
+Some objectives may be optional but should provide a strategic advantage.
+
+---
+
+PART 7 — HUNTER SYSTEM
+
+The first playable Hunter is:
+
+SHADOW HUNTER
+
+Implement:
+
+Shadow Blink
+
+A short-distance movement ability with a cooldown.
+
+Blood Vision
+
+Temporarily reveals relevant Survivor information within a defined range or through a clearly specified detection rule.
+
+Door Breaker
+
+A temporary boost to damage against doors or structures.
+
+All abilities must have:
+
+- Activation rules.
+- Cooldowns.
+- Resource costs if applicable.
+- Duration.
+- Range.
+- Animation.
+- Audio feedback.
+- Server-side validation online.
+- AI decision rules offline.
+
+Later Hunter types may include:
+
+- Blood Hunter.
+- Nightmare Hunter.
+- The Warden.
+
+Do not implement all Hunter variants before the first one is fully playable and balanced.
+
+---
+
+PART 8 — OFFLINE AI
+
+Offline gameplay is a core requirement, not an optional demo.
+
+The game must work without an internet connection.
+
+Support:
+
+1. Human Survivor versus AI Hunter and six AI Survivors.
+2. Human Hunter versus seven AI Survivors.
+3. Fully AI-controlled simulation for testing.
+
+Use deterministic, testable game AI rather than relying on cloud LLM calls.
+
+Survivor AI states
+
+Implement a state machine with states such as:
+
+- SPAWN
+- SELECT_ROOM
+- FIND_ROOM
+- COLLECT_RESOURCES
+- BUILD_DEFENSE
+- UPGRADE_DEFENSE
+- COMPLETE_OBJECTIVE
+- SCOUT
+- AVOID_HUNTER
+- REPAIR
+- HELP_TEAMMATE
+- ESCAPE
+- ELIMINATED
+
+AI must consider:
+
+- Current resources.
+- Threat distance.
+- Door health.
+- Room safety.
+- Team status.
+- Objective importance.
+- Available construction slots.
+- Time remaining.
+
+Hunter AI states
+
+- PATROL
+- SEARCH
+- INVESTIGATE
+- TRACK
+- APPROACH
+- ATTACK
+- DESTROY_STRUCTURE
+- USE_ABILITY
+- CHANGE_TARGET
+- REPOSITION
+
+AI must use limited information.
+
+Do not give AI perfect map knowledge, instant reactions or impossible detection abilities.
+
+Difficulty
+
+- Easy
+- Normal
+- Hard
+- Nightmare
+
+Difficulty should modify behavior, decision quality, reaction time and strategic priorities—not secretly give AI impossible information.
+
+Build AI debug tools showing:
+
+- Current state.
+- Current target.
+- Decision score.
+- Selected action.
+- Reason for the decision.
+
+---
+
+PART 9 — ORIGINAL MAP DESIGN
+
+The first map:
+
+ABANDONED DORMITORY
+
+Create an original top-down layout.
+
+Required areas:
+
+- Multiple bedrooms.
+- Central corridors.
+- Storage room.
+- Generator room.
+- Medical room.
+- Utility area.
+- Locked passages.
+- Multiple possible routes.
+- Escape area.
+
+The map must support tactical movement, navigation, visibility, construction and combat.
+
+Do not reproduce the exact map grid or visual design of Haunted Dorm.
+
+Build map data separately from gameplay code.
+
+Use a data-driven map definition with:
+
+- Tile types.
+- Walkability.
+- Collision.
+- Room identifiers.
+- Door connections.
+- Construction slots.
+- Spawn points.
+- Objective positions.
+- Escape location.
+- Navigation metadata.
+
+Future map concepts:
+
+- Abandoned Hospital.
+- Haunted School.
+- Underground Laboratory.
+- Forgotten Hotel.
+- Nightmare Mansion.
+
+Only the first map is required for the first complete MVP.
+
+---
+
+PART 10 — ART AND AUDIO
+
+All NIGHTTERROR assets must be original.
+
+Visual direction:
+
+- 2D top-down.
+- Dark vector graphics.
+- Readable silhouettes.
+- Strong contrast between Hunter and Survivors.
+- Black, muted purple and dark crimson as identity colors.
+- Controlled lighting and atmospheric effects.
+
+Create original:
+
+- Survivors.
+- Hunter.
+- Rooms.
+- Doors.
+- Structures.
+- Abilities.
+- Particles.
+- Icons.
+- Menus.
+- HUD.
+- Audio effects.
+- Background music.
+
+Use scalable vector source assets where practical and optimized exports for the Android game.
+
+Do not copy extracted Haunted Dorm images, animations, audio, atlas layouts, UI designs, maps or branding.
+
+---
+
+PART 11 — MOBILE UX
+
+Design for Android touchscreens.
+
+Required controls:
+
+- Virtual movement joystick.
+- Context-sensitive interaction.
+- Build menu.
+- Upgrade menu.
+- Ability buttons.
+- Map/objective view.
+- Resource indicators.
+- Health indicators.
+- Match timer.
+- Team status.
+- Escape progress.
+
+Requirements:
+
+- Responsive layout.
+- Different screen aspect ratios.
+- Safe-area handling.
+- Clear touch targets.
+- Adjustable controls.
+- Readable text.
+- Performance-conscious effects.
+- Settings for sound, music and vibration.
+
+The player should never need a keyboard or mouse for normal gameplay.
+
+---
+
+PART 12 — ONLINE MULTIPLAYER
+
+Preferred backend:
+
+- Nakama.
+- PostgreSQL.
+- Docker Compose for local development.
+
+The online mode must use real player sessions and authoritative match state.
+
+Development order
+
+1. Local backend.
+2. Authentication.
+3. Player profiles.
+4. Match session creation.
+5. Two-player connectivity test.
+6. Small multiplayer test.
+7. Full 1v7 match.
+8. Matchmaking.
+9. Ranked system.
+10. Reconnection and failure handling.
+
+Do not pretend a local bot simulation is online multiplayer.
+
+Authoritative server requirements
+
+The server must validate:
+
+- Movement.
+- Position limits.
+- Attack range.
+- Damage.
+- Cooldowns.
+- Ability activation.
+- Resource spending.
+- Building.
+- Upgrades.
+- Objective progress.
+- Elimination.
+- Escape completion.
+- Match results.
+
+Never trust the client to decide competitive outcomes.
+
+Matchmaking
+
+Provide:
+
 - Quick Match.
 - Ranked Match.
-- Private Rooms.
-- Friends system.
-- Player profiles.
-- Match history.
-- Competitive leaderboards.
-- Reconnection support.
-- Server-validated match results.
+- Private Match.
 
-The game should use server-authoritative match logic to prevent players from modifying health, damage, rewards or rankings through their clients.
+Maintain separate ratings for Hunter and Survivor roles.
 
-C. Training Mode
+Possible ranking tiers:
 
-A separate mode for learning:
+- Bronze.
+- Silver.
+- Gold.
+- Platinum.
+- Diamond.
+- Master.
+- Nightmare.
 
-- Hunter abilities.
-- Survivor abilities.
-- Defense construction.
-- Resource management.
-- Map layouts.
-- Combat mechanics.
+Use a server-side rating algorithm and store match history.
 
-4. Survivor Gameplay
+Disconnect handling
 
-Survivors are the defensive and objective-oriented side.
+Implement:
 
-Their main objective is to survive and complete the required objectives.
+- Reconnection tokens.
+- Reconnect windows.
+- Temporary AI takeover if appropriate.
+- Match termination rules.
+- Duplicate session prevention.
+- Server-authoritative match recovery where feasible.
 
-Survivor mechanics
+Never store database credentials or server secrets in the Android client.
 
-Room selection
+Hosting reality
 
-Players begin in a shared spawn area and must find available rooms.
+Local Docker development can be free.
 
-Rooms contain:
+Do not assume that a reliable, always-on public authoritative multiplayer server will remain free.
 
-- A defensive door.
-- Resource generation space.
-- Turret placement areas.
-- Upgrade slots.
-- Limited defensive structures.
-
-Rooms should not provide absolute safety.
-
-Resource generation
-
-Survivors generate resources through structures and objective completion.
-
-Initial resource types:
-
-Resource| Purpose
-Energy| Main construction resource
-Metal| Defensive upgrades
-Dream Shards| Special abilities
-
-Defensive structures
-
-Initial structures:
-
-1. Basic turret.
-2. Rapid-fire turret.
-3. Slowdown trap.
-4. Healing station.
-5. Energy generator.
-6. Reinforced door.
-
-Every structure has upgrade levels.
-
-Example:
-
-Door progression
-
-- Level 1: Basic wooden door.
-- Level 2: Reinforced door.
-- Level 3: Metal security door.
-- Level 4: Energy barrier.
-- Level 5: Advanced defensive barrier.
-
-Upgrades should have diminishing returns so that fully upgrading one room is not an automatic winning strategy.
-
-Survivor objectives
-
-Survivors should not be allowed to camp indefinitely.
-
-Introduce three objective categories:
-
-- Power restoration: Repair generators around the map.
-- Dream stabilizers: Activate special structures.
-- Escape preparation: Unlock the final exit.
-
-Completing objectives creates opportunities for cooperation but also exposes survivors to danger.
-
-5. Hunter Gameplay
-
-The Hunter is the offensive role.
-
-The Hunter must locate survivors, destroy defenses and prevent their escape.
-
-Hunter mechanics
-
-- Basic attack.
-- Special abilities.
-- Tracking.
-- Door destruction.
-- Structure destruction.
-- Movement upgrades.
-- Temporary transformations.
-- Cooldown management.
-
-The Hunter should have a different progression path from Survivors.
-
-Initial Hunter abilities
-
-Ability| Description
-Blood Vision| Reveals nearby survivor locations temporarily
-Shadow Blink| Short-distance teleportation
-Door Breaker| Increased damage against doors
-Nightmare Fog| Creates an area of reduced visibility
-Sound Detection| Detects recent survivor activity
-Rage Mode| Temporary combat enhancement
-
-For the first release, implement only three active abilities.
-
-Hunter progression
-
-The Hunter earns experience during the match through:
-
-- Successful attacks.
-- Destroying structures.
-- Tracking survivors.
-- Eliminating survivors.
-- Interrupting objectives.
-
-Progression should unlock tactical choices, not simply make the Hunter overwhelmingly stronger.
-
-6. Character Classes
-
-Survivor classes
-
-Initial classes:
-
-1. Engineer
-
-- Builds defenses faster.
-- Repairs structures.
-- Bonus resource efficiency.
-
-2. Medic
-
-- Heals teammates.
-- Restores defensive structures.
-- Support-oriented gameplay.
-
-3. Scout
-
-- Moves faster.
-- Detects nearby danger.
-- Can temporarily reveal map information.
-
-4. Technician
-
-- Improves generators.
-- Disables certain Hunter traps.
-- Specializes in objectives.
-
-Hunter classes
-
-Initial classes:
-
-1. Shadow Hunter
-
-- Teleportation.
-- Ambush attacks.
-- Stealth-oriented gameplay.
-
-2. Blood Hunter
-
-- Tracking.
-- Increased attack pressure.
-- Survivor detection.
-
-3. Nightmare Hunter
-
-- Area control.
-- Fear effects.
-- Defensive disruption.
-
-Classes should have distinct strengths and weaknesses.
-
-7. Map Design
-
-The first map should be an abandoned dormitory.
-
-Map elements
-
-- Eight or more bedrooms.
-- Main corridor.
-- Central generator room.
-- Storage area.
-- Medical room.
-- Locked passages.
-- Escape objective.
-- Multiple routes between rooms.
-
-Future maps
-
-1. Abandoned Hospital.
-2. Haunted School.
-3. Underground Laboratory.
-4. Forgotten Hotel.
-5. Nightmare Mansion.
-
-Every map should introduce different strategic opportunities.
-
-Maps should be designed with readable top-down navigation, mobile-friendly object sizes and clear collision boundaries.
-
-8. Online Competitive System
-
-Hunter and Survivor ratings must be independent.
-
-Rank tiers
-
-1. Bronze
-2. Silver
-3. Gold
-4. Platinum
-5. Diamond
-6. Master
-7. Nightmare
-
-Each rank can contain multiple divisions.
-
-Rating calculations
-
-Consider:
-
-- Match outcome.
-- Individual contribution.
-- Opponent skill rating.
-- Objective participation.
-- Hunter performance.
-- Survivor survival and teamwork.
-
-Avoid rewarding meaningless activity such as repeatedly attacking structures without strategic value.
-
-Use a server-side rating system. An Elo-style or Glicko-style rating system is suitable initially.
-
-Seasonal progression
-
-- Seasonal rank resets.
-- Competitive rewards.
-- Exclusive cosmetic rewards.
-- Seasonal leaderboard.
-- Match statistics.
-
-Ranked matchmaking should only be enabled after the online game has a sufficiently healthy player population.
-
-9. Progression and Economy
-
-The game should have two types of progression.
-
-Account progression
-
-- Player level.
-- Experience.
-- Achievements.
-- Hunter mastery.
-- Survivor mastery.
-- Cosmetics.
-
-Match progression
-
-- Temporary resources.
-- In-match upgrades.
-- Ability unlocks.
-- Objective completion.
-
-Do not allow players to purchase competitive damage advantages.
-
-Monetization
-
-Free-to-play with optional cosmetic purchases.
-
-Potential revenue:
-
-- Character skins.
-- Hunter appearance packs.
-- Victory animations.
-- Elimination effects.
-- Special visual effects.
-- Cosmetic battle pass.
-
-Rewarded advertisements may be used in offline mode, but should not interrupt ranked matches.
-
-10. Mobile UI/UX
-
-The game must be designed specifically for touchscreens.
-
-Main menu
-
-Include:
-
-- Play.
-- Offline.
-- Online.
-- Ranked.
-- Characters.
-- Inventory.
-- Shop.
-- Profile.
-- Settings.
-
-Gameplay HUD
-
-Survivor HUD:
-
-- Virtual joystick.
-- Interact button.
-- Build menu.
-- Ability buttons.
-- Resource counters.
-- Objective indicators.
-- Health indicator.
-- Mini-map.
-
-Hunter HUD:
-
-- Virtual joystick.
-- Attack button.
-- Three ability buttons.
-- Tracking indicators.
-- Hunter energy.
-- Survivor counter.
-- Cooldown indicators.
-
-Use scalable UI layouts for different Android screen sizes.
-
-11. Art Direction
-
-The visual direction should be dark, atmospheric and recognizable.
-
-Visual identity
-
-- Dark blue and purple environments.
-- Red lighting for danger.
-- Glowing ability effects.
-- Animated shadows.
-- Atmospheric fog.
-- Distinct character silhouettes.
-- Readable environmental objects.
-
-Graphics requirements
-
-- 2D top-down perspective.
-- Original sprite sheets.
-- Animated characters.
-- Animated monsters.
-- Tile-based environments.
-- Particle effects.
-- Lighting and shadows.
-
-Target 60 FPS on supported devices, with scalable effects for lower-end Android phones.
-
-The game should prioritize readability over excessive visual effects.
-
-12. Technical Architecture
-
-Recommended stack
-
-Layer| Technology
-Game engine| Godot 4
-Programming| GDScript
-Game rendering| Godot 2D
-Physics| Godot 2D Physics
-Online backend| Nakama
-Multiplayer| Authoritative real-time matches
-Backend runtime| Nakama server runtime
-Database| PostgreSQL
-Android build| Android APK / AAB
-Version control| Git
-
-Architecture overview
-
-Android Game Client
-
-- Rendering.
-- Controls.
-- Animations.
-- UI.
-- Local AI.
-- Offline progression.
-- Online connection.
-
-Nakama Backend
-
-- Authentication.
-- Matchmaking.
-- Match sessions.
-- Player profiles.
-- Friends.
-- Leaderboards.
-
-Authoritative Match Logic
-
-- Player movement validation.
-- Damage validation.
-- Ability cooldowns.
-- Resource calculations.
-- Construction validation.
-- Match timers.
-- Win conditions.
-
-PostgreSQL
-
-- Accounts.
-- Match history.
-- Rankings.
-- Progression.
-- Inventory.
-- Seasonal statistics.
-
-Offline and online separation
-
-Both modes should share the same gameplay rules and core simulation logic.
-
-Offline:
-
-- Local simulation.
-- Local bots.
-- Local saves.
-- No server dependency.
-
-Online:
-
-- Server-authoritative simulation.
-- Real-time state synchronization.
-- Server-side progression.
-- Validated match rewards.
-
-Do not allow offline save data to directly modify competitive online rankings.
-
-13. Networking Requirements
-
-Online gameplay needs:
-
-- Server-authoritative match simulation.
-- Real-time state synchronization.
-- Interpolation for remote characters.
-- Prediction for responsive movement where appropriate.
-- Server-side collision and damage validation.
-- Reconnection handling.
-- Match timeout handling.
-- Player disconnection detection.
-- Basic anti-cheat measures.
-
-Use an appropriate network tick rate and test bandwidth consumption before choosing a final value.
-
-A disconnected player should have a short reconnection window. The match should not automatically award victory merely because one player temporarily loses connectivity.
-
-14. Security and Fair Play
-
-Important rules:
-
-- Clients cannot directly award themselves rank points.
-- Clients cannot decide their own damage values.
-- Clients cannot modify authoritative match resources.
-- Match results must be validated.
-- Account requests must be authenticated.
-- Rate-limit sensitive requests.
-- Validate all player inputs.
-- Detect impossible movement and suspicious actions.
-
-Competitive rewards should only be granted after the server confirms the match result.
-
-15. Performance Requirements
-
-Target devices should include lower-end Android hardware.
-
-Optimization priorities:
-
-- Sprite batching.
-- Object pooling.
-- Efficient collision detection.
-- Limited particle counts.
-- Texture compression.
-- Lightweight shaders.
-- Controlled network updates.
-- Efficient AI simulation.
-
-The eight-player match should be tested with all seven Survivors and the Hunter active simultaneously.
-
-Do not assume that a game running smoothly with two test players will run smoothly with eight.
+Separate local development from eventual public deployment.
 
 ---
 
-16. Development Roadmap
+PART 13 — PROGRESSION AND RETENTION
 
-Phase 1 — Foundation
+Implement a modest, fair progression system.
 
-Deliverables:
+Initial systems:
 
-- Godot project.
-- Android input system.
+- Player profile.
+- Experience.
+- Unlockable characters.
+- Cosmetic rewards.
+- Achievements.
+- Match history.
+- Separate Hunter and Survivor ratings for online play.
+
+Do not make competitive upgrades pay-to-win.
+
+Cosmetics must not alter competitive hitboxes or provide hidden combat advantages.
+
+The offline mode must remain playable without online accounts.
+
+---
+
+PART 14 — TECHNICAL ARCHITECTURE
+
+Preferred technology:
+
+- Godot 4 stable.
+- GDScript.
+- 2D physics.
+- NavigationServer2D or another verified navigation approach.
+- Nakama.
+- PostgreSQL.
+- Docker Compose.
+- Git.
+- Automated testing.
+
+Verify actual version compatibility before adding dependencies.
+
+Suggested architecture:
+
+"scenes/"
+
+- boot/
+- menus/
+- lobby/
+- gameplay/
+- maps/
+- players/
+- hunter/
+- survivor/
+- ui/
+
+"scripts/"
+
+- core/
+- match/
+- players/
+- hunter/
+- survivor/
+- combat/
+- abilities/
+- resources/
+- construction/
+- objectives/
+- ai/
+- navigation/
+- networking/
+- progression/
+- saves/
+- ui/
+
+"assets/"
+
+- characters/
+- hunter/
+- survivors/
+- environments/
+- structures/
+- abilities/
+- effects/
+- audio/
+- fonts/
+- ui/
+
+"data/"
+
+- characters/
+- abilities/
+- maps/
+- structures/
+- balance/
+- objectives/
+
+"backend/"
+
+- docker-compose.yml
+- nakama/
+- migrations/
+- runtime/
+- tests/
+
+"tests/"
+
+- unit/
+- gameplay/
+- ai/
+- networking/
+- integration/
+- performance/
+
+"docs/"
+
+- architecture.md
+- reference_analysis.md
+- game_design.md
+- gameplay_systems.md
+- ai_design.md
+- networking.md
+- testing.md
+- android_build.md
+- development_log.md
+
+Adapt this structure if the existing repository already has a better architecture.
+
+---
+
+PART 15 — SAVE SYSTEM
+
+Offline progression must be stored locally.
+
+Implement:
+
+- Versioned save schema.
+- Profile data.
+- Settings.
+- Offline progression.
+- Unlocks.
+- Achievements.
+- Save validation.
+- Safe migration between versions.
+- Corruption recovery where possible.
+
+Never allow an offline save to directly determine online competitive rank or match results.
+
+---
+
+PART 16 — TESTING AND QUALITY
+
+Every gameplay system must have meaningful tests.
+
+Required tests:
+
+- Room occupancy.
+- Door damage and repair.
+- Resource generation.
+- Construction costs.
+- Upgrade costs.
+- Turret targeting.
+- Turret damage.
+- Hunter ability cooldowns.
+- Survivor elimination.
+- Objective progression.
+- Escape conditions.
+- AI decision behavior.
+- Match state transitions.
+- Offline airplane-mode operation.
+- Save/load.
+- Multiplayer validation.
+- Reconnection.
+- Android touch input.
+- Low-memory behavior.
+
+Test both Hunter and Survivor roles.
+
+Test actual matches, not only isolated menus.
+
+Record bugs and regressions.
+
+Do not claim that an APK works unless it has actually been built and tested.
+
+---
+
+PART 17 — PHASED DEVELOPMENT ROADMAP
+
+Do not attempt the entire game in one generation.
+
+PHASE 0 — INPUT AUDIT AND TECHNICAL FOUNDATION
+
+- Inspect the repository.
+- Inspect the reference archive.
+- Write a reference analysis report.
+- Write the original NIGHTTERROR game design document.
+- Document architecture and dependencies.
+- Verify Godot installation.
+- Verify Android export requirements.
+- Set up Git.
+- Create the project structure.
+- Create a boot scene.
+- Verify that the project opens and runs.
+
+Acceptance: A working Godot project with documented architecture and an accurate audit.
+
+PHASE 1 — CORE PLAYABLE MOVEMENT
+
 - Top-down movement.
+- Virtual joystick.
 - Camera.
 - Collision.
-- Basic map.
+- Navigation.
+- Interactions.
+- First original room environment.
 - Character animations.
 
-Completion criteria: A character can move around the first map reliably on an Android device.
+Acceptance: A player can move around the map on an Android device.
 
-Phase 2 — Offline Core Gameplay
+PHASE 2 — ROOM AND ECONOMY
 
-Deliverables:
-
-- Survivor gameplay.
-- Hunter gameplay.
-- Room selection.
+- Room occupancy.
+- Beds.
 - Resource generation.
-- Door upgrades.
-- Turrets.
-- Combat.
-- Win/loss conditions.
+- Doors.
+- Door HP.
+- Repairs.
+- Upgrade menu.
+- Construction slots.
+- Basic structures.
 
-Completion criteria: One complete offline match can be played from beginning to end.
+Acceptance: A player can develop a room and manage resources.
 
-Phase 3 — AI Systems
+PHASE 3 — HUNTER COMBAT
 
-Deliverables:
+- Hunter movement.
+- Attacks.
+- Door damage.
+- Structure destruction.
+- Health and damage.
+- Three initial abilities.
+- Visual and audio feedback.
 
+Acceptance: Hunter and Survivor can participate in a complete combat encounter.
+
+PHASE 4 — COMPLETE OFFLINE MATCH
+
+- Match state machine.
+- Seven AI Survivors.
 - AI Hunter.
-- AI Survivors.
-- Different difficulty levels.
-- Navigation.
-- Resource priorities.
-- Objective behaviour.
-- Basic adaptive strategies.
+- Objectives.
+- Escape sequence.
+- Victory and defeat.
+- Difficulty.
+- Local progression.
+- Offline save system.
 
-Completion criteria: Offline matches are playable without internet and provide a meaningful challenge.
+Acceptance: The complete game loop works without internet.
 
-Phase 4 — Multiplayer Prototype
+PHASE 5 — MOBILE POLISH
 
-Start with a smaller test configuration.
-
-Deliverables:
-
-- Nakama deployment.
-- Authentication.
-- Matchmaking.
-- Real-time player synchronization.
-- Server-authoritative combat.
-- Match sessions.
-- Disconnection handling.
-
-Completion criteria: A small group of real players can complete a synchronized match.
-
-Phase 5 — Full 1v7 Multiplayer
-
-Deliverables:
-
-- Eight-player matches.
-- Random Hunter assignment.
-- Eight-player map balancing.
-- Match performance optimization.
-- Server-side validation.
-- Reconnection system.
-
-Completion criteria: Eight real players can finish matches without critical synchronization or gameplay errors.
-
-Phase 6 — Competitive Systems
-
-Deliverables:
-
-- Ranked matchmaking.
-- Separate Hunter and Survivor ratings.
-- Player profiles.
-- Match history.
-- Leaderboards.
-- Seasonal rewards.
-
-Completion criteria: Competitive progression works entirely through validated server results.
-
-Phase 7 — Content and Polish
-
-Deliverables:
-
-- Additional maps.
-- More characters.
-- Additional abilities.
-- Cosmetics.
-- Audio.
-- Animations.
-- Tutorials.
+- Main menu.
+- Character selection.
 - Settings.
-- Accessibility improvements.
+- Match HUD.
+- Build interface.
+- Results interface.
+- Touch optimization.
+- Android performance testing.
 
-Phase 8 — Android Release
+Acceptance: A playable offline Android APK.
 
-Deliverables:
+PHASE 6 — LOCAL MULTIPLAYER BACKEND
 
-- Performance testing.
-- Device compatibility.
-- Crash reporting.
-- Privacy policy.
-- Play Store assets.
-- Internal testing.
-- Closed testing.
-- Production release.
+- Docker Compose.
+- Nakama.
+- PostgreSQL.
+- Authentication.
+- Profiles.
+- Match sessions.
+- Authoritative validation.
+
+Acceptance: Two real clients connect and exchange validated gameplay state.
+
+PHASE 7 — MULTIPLAYER PROTOTYPE
+
+- Small player-count testing.
+- Real-time synchronization.
+- Server-side combat.
+- Disconnect handling.
+- Latency handling.
+- Match lifecycle.
+
+Acceptance: A real multiplayer match can be completed and verified.
+
+PHASE 8 — FULL 1V7 MULTIPLAYER
+
+- Eight-player sessions.
+- Hunter assignment.
+- Survivor assignment.
+- Team state.
+- Matchmaking.
+- Reconnection.
+- Server-side results.
+
+Acceptance: Full 1 Hunter versus 7 Survivors works with real clients.
+
+PHASE 9 — RANKED AND PROGRESSION
+
+- Separate role ratings.
+- Leaderboards.
+- Match history.
+- Seasons.
+- Achievements.
+- Cosmetics.
+
+Acceptance: Competitive data is stored and validated server-side.
+
+PHASE 10 — RELEASE PREPARATION
+
+- Full regression testing.
+- Android performance optimization.
+- Crash fixes.
+- Build configuration.
+- Privacy and permission review.
+- Release documentation.
+- Final APK/AAB.
+
+Acceptance: Reproducible builds, documented test results and a release-ready offline game with the online features actually completed.
 
 ---
 
-17. MVP Scope
+PART 18 — FIRST MVP SCOPE
 
-The first playable version must remain small.
+Do not build every planned feature immediately.
 
-Feature| First MVP
-Camera| Top-down
-Map| 1 dormitory
-Hunters| 1
-Survivor classes| 2
-Survivor abilities| 2
-Hunter abilities| 3
-AI opponents| Yes
-Offline gameplay| Yes
-Online gameplay| Initial small-scale test
-Full 1v7| Later milestone
-Ranked| Later milestone
-Shop| No
-Battle pass| No
+The first complete playable MVP must contain:
 
-The first goal is to establish whether the core gameplay is enjoyable.
+- One original map.
+- One playable Survivor.
+- One playable Shadow Hunter.
+- Seven AI Survivors when the human is Hunter.
+- One AI Hunter when the human is Survivor.
+- Room selection.
+- Beds and resource generation.
+- Doors and repairs.
+- At least two functioning defensive structures.
+- Three Hunter abilities.
+- At least two objectives.
+- A working escape sequence.
+- Win/loss logic.
+- Offline save support.
+- Android touch controls.
 
-18. Testing and Quality Assurance
+This is the minimum complete offline game.
 
-Test these scenarios:
+Only after this is reliable should the project expand into the complete online system.
 
-1. Hunter attacks a Survivor.
-2. Survivor upgrades a door.
-3. Turret attacks the Hunter.
-4. Multiple Survivors cooperate.
-5. Hunter uses abilities.
-6. Survivor completes an objective.
-7. Player disconnects.
-8. Player reconnects.
-9. Match ends normally.
-10. Server restarts during a match.
-11. Offline mode works with airplane mode enabled.
-12. Offline progress cannot manipulate ranked rewards.
+---
 
-Performance testing must include low-end Android devices.
+PART 19 — DEVELOPMENT RULES
 
-19. Estimated Development Schedule
+These rules are mandatory.
 
-Indicative solo-developer estimates:
+1. Inspect before modifying.
+2. Preserve working repository code when practical.
+3. Build one phase at a time.
+4. Implement actual gameplay logic.
+5. Do not use fake buttons.
+6. Do not substitute static UI for gameplay.
+7. Do not claim an unfinished feature is complete.
+8. Do not simulate online multiplayer and label it real multiplayer.
+9. Do not invent test results.
+10. Do not hide known bugs.
+11. Keep balance data configurable.
+12. Keep the project runnable after every major phase.
+13. Use Git commits at meaningful milestones.
+14. Maintain architecture and development documentation.
+15. Verify dependencies and APIs before using them.
+16. Prefer free and open-source tools.
+17. Do not require a paid cloud LLM for offline AI.
+18. Do not copy reference-game intellectual property.
 
-Milestone| Estimated time
-Foundation| 1–2 weeks
-Offline core| 2–4 weeks
-AI systems| 2–3 weeks
-Multiplayer prototype| 3–5 weeks
-Full 1v7| 2–4 additional weeks
-Ranked systems| 2–3 weeks
-Polish and testing| 3–5 weeks
+Reference-game IP boundary
 
-These are planning estimates, not guaranteed delivery dates. A reliable online release can take longer due to networking, balancing and device testing.
+Haunted Dorm is for high-level functional study only.
 
-20. Final Product Principles
+Do not reproduce or redistribute:
 
-1. Offline gameplay must not require an account or internet connection.
-2. Online and offline modes must share the core gameplay rules.
-3. Hunter and Survivor must both be enjoyable.
-4. Ranked matchmaking must use server-verified results.
-5. Players must have multiple strategic options.
-6. No pay-to-win competitive advantages.
-7. Performance on lower-end Android devices matters.
-8. The game must have original art, characters, maps and identity.
-9. Multiplayer should be tested progressively before launching full 1v7.
-10. Do not sacrifice gameplay quality to add unnecessary features.
+- Its proprietary source code.
+- Extracted artwork.
+- Character designs.
+- Audio.
+- Exact maps.
+- Branding.
+- Text.
+- Distinctive UI layouts.
+- Proprietary assets.
 
-FINAL PRODUCT VISION
+Implement original systems using NIGHTTERROR's own code, assets, names, balance and design.
 
-Dream Hunter should become a mobile horror-survival game where players can enjoy offline matches whenever they want, or enter a competitive online world where real players hunt each other.
+---
 
-The defining experience is the battle between one intelligent human Hunter and seven human Survivors.
+PART 20 — REQUIRED DOCUMENTATION
 
-Build the gameplay first. Build the competitive ecosystem second.
+Maintain these documents throughout development:
+
+1. "reference_analysis.md"
+2. "game_design.md"
+3. "architecture.md"
+4. "gameplay_systems.md"
+5. "ai_design.md"
+6. "networking.md"
+7. "balance_design.md"
+8. "testing.md"
+9. "build_android.md"
+10. "development_log.md"
+11. "known_issues.md"
+12. "milestone_status.md"
+
+For every phase, report:
+
+- What was implemented.
+- Files created or modified.
+- What actually works.
+- Tests executed.
+- Test results.
+- Known bugs.
+- Remaining work.
+- Current blockers.
+- Next phase.
+
+Clearly distinguish implemented, partially implemented, planned and blocked features.
+
+---
+
+PART 21 — FIRST RESPONSE AND EXECUTION INSTRUCTIONS
+
+Do not start by generating the entire game.
+
+First:
+
+1. Confirm whether the repository is accessible.
+2. Confirm whether the reference ZIP is accessible.
+3. Inspect both.
+4. Produce the reference analysis report.
+5. Produce the repository audit.
+6. Present the proposed NIGHTTERROR architecture.
+7. Identify technical risks.
+8. Propose the final MVP scope.
+9. Begin Phase 0 only.
+
+If either input is missing, explain exactly what is missing and how the user can provide it.
+
+Do not silently substitute assumptions.
+
+Do not ask the user to repeat details already provided in this specification.
+
+Make reasonable engineering decisions independently when the information is sufficient.
+
+Ask only when a decision materially affects the game's identity, architecture or intended behavior.
+
+Final objective: Build NIGHTTERROR as a genuinely playable, original Android horror-survival strategy game, with complete offline gameplay first and real authoritative 1v7 online multiplayer as a later milestone.
+
+Start with the repository and reference archive audit. Do not skip Phase 0.
