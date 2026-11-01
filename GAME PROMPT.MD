@@ -10,6 +10,9 @@ This is an implementation project, not a concept-document project.
 
 Do not generate a fake prototype, static mockup, menu-only project, placeholder gameplay, simulated multiplayer or untested APK.
 
+Github Repository Link https://github.com/purabsingh089/NIGHTTERROR Analyze the repository it will help you or analyze the haunted dorm.zip file
+
+
 ---
 
 PART 1 — PROJECT IDENTITY
