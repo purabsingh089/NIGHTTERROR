@@ -154,6 +154,10 @@ Never claim to have analyzed an attachment that is not present in your own works
 
 PART 3 — REFERENCE GAMEPLAY UNDERSTANDING
 
+A checked-in analysis of the actual cached build is maintained in `reference_analysis.md`. Read it before using reference-game findings. The report labels each finding VERIFIED, STRONGLY INDICATED, or UNKNOWN and records the limitations of the minified bundle. Keep it updated when further files or runtime behavior are inspected; do not promote hypotheses to facts without evidence.
+
+Repository audit at the time of writing: the root contains this prompt and the reference ZIP, but no Godot project, source tree, dependencies, build configuration, or tests. Treat this as an empty implementation repository, not as an existing game codebase to preserve. Begin with Phase 0's documented foundation and verify tools and requirements before claiming the project opens or runs.
+
 The reference archive provides evidence of a strategic loop built around room security, resource generation, construction, upgrades and surviving a pursuing Hunter.
 
 The English localization includes instructions explaining that players should:
