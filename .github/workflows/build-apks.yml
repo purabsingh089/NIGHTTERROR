@@ -1,4 +1,4 @@
-name: Validate NIGHTTERROR startup
+name: Validate NIGHTTERROR and build test APKs
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,8 +30,76 @@ jobs:
         run: |
           set -o pipefail
           ./Godot_v4.3-stable_linux.x86_64 --headless --path . --quit-after 3 2>&1 | tee godot-runtime.log
-          if grep -E "SCRIPT ERROR:|ERROR: Failed to load script|Parse Error" godot-runtime.log; then
+          if grep -E "SCRIPT ERROR:|ERROR: Failed to load script|Parse Error|NIGHTTERROR_FIRST_FRAME_ERROR" godot-runtime.log; then
             exit 1
           fi
-          grep -q "NIGHTTERROR_READY" godot-runtime.log
-          grep -q "NIGHTTERROR_FIRST_FRAME" godot-runtime.log
+          grep -Fxq "NIGHTTERROR_READY" godot-runtime.log
+          grep -Fxq "NIGHTTERROR_FIRST_FRAME" godot-runtime.log
+
+      - name: Install Android export templates
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip -q Godot_v4.3-stable_export_templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          mv templates "$HOME/.local/share/godot/export_templates/4.3.stable"
+          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+
+      - name: Set up JDK 17
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android packages and debug keystore
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -1)"
+          yes | "$SDKMANAGER" --licenses > /dev/null
+          "$SDKMANAGER" "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+          mkdir -p "$HOME/keystore" "$HOME/.config/godot" build
+          keytool -keyalg RSA -genkeypair \
+            -alias androiddebugkey \
+            -keypass android \
+            -keystore "$HOME/keystore/debug.keystore" \
+            -storepass android \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -validity 9999 -keysize 2048 -deststoretype pkcs12
+          for name in editor_settings-4 editor_settings-4.3; do
+            cat > "$HOME/.config/godot/$name.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/keystore/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+          done
+
+      - name: Export ARMv7 test APK
+        if: github.event_name == 'workflow_dispatch'
+        run: ./Godot_v4.3-stable_linux.x86_64 --verbose --headless --path . --export-debug "Android ARMv7" build/NIGHTTERROR-armv7.apk
+
+      - name: Export ARM64 test APK
+        if: github.event_name == 'workflow_dispatch'
+        run: ./Godot_v4.3-stable_linux.x86_64 --verbose --headless --path . --export-debug "Android ARM64" build/NIGHTTERROR-arm64.apk
+
+      - name: Verify test APKs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          test -s build/NIGHTTERROR-armv7.apk
+          test -s build/NIGHTTERROR-arm64.apk
+
+      - name: Upload test APK artifacts
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NIGHTTERROR-device-test-${{ github.run_number }}
+          path: |
+            build/NIGHTTERROR-armv7.apk
+            build/NIGHTTERROR-arm64.apk
+          if-no-files-found: error
+          retention-days: 14
