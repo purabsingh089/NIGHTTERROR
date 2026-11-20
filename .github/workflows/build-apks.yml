@@ -51,7 +51,8 @@ jobs:
           [gd_resource type="EditorSettings" format=3]
 
           [resource]
-          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
           export/android/debug_keystore = "$HOME/keystore/debug.keystore"
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
@@ -69,11 +70,11 @@ jobs:
 
       - name: Export ARMv7 APK
         run: |
-          ./Godot_v4.3-stable_linux.x86_64 --headless --path . --export-debug "Android ARMv7" build/NIGHTTERROR-armv7.apk
+          ./Godot_v4.3-stable_linux.x86_64 --verbose --headless --path . --export-debug "Android ARMv7" build/NIGHTTERROR-armv7.apk
 
       - name: Export ARM64 APK
         run: |
-          ./Godot_v4.3-stable_linux.x86_64 --headless --path . --export-debug "Android ARM64" build/NIGHTTERROR-arm64.apk
+          ./Godot_v4.3-stable_linux.x86_64 --verbose --headless --path . --export-debug "Android ARM64" build/NIGHTTERROR-arm64.apk
 
       - name: Verify APKs
         run: |
