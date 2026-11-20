@@ -1,0 +1,49 @@
+{
+  "match": {
+    "preparation_seconds": 15.0,
+    "hunt_seconds": 180.0,
+    "survivor_team_size": 7,
+    "bot_speed": 82.0,
+    "bot_objective_seconds": 8.0,
+    "bot_attack_range": 52.0,
+    "bot_attack_damage": 8,
+    "bot_attack_cooldown": 1.0,
+    "bot_flee_radius": 120.0,
+    "bot_flee_speed_multiplier": 1.35,
+    "rescue_cost": 15,
+    "survivor_win_count": 4
+  },
+  "survivor": {
+    "speed": 180.0,
+    "max_health": 100,
+    "attack_range": 52.0,
+    "attack_damage": 12,
+    "attack_cooldown": 0.65,
+    "stun_duration": 1.2
+  },
+  "hunter": {
+    "speed": 92.0,
+    "max_health": 160,
+    "attack_damage": 12,
+    "attack_cooldown": 0.75,
+    "door_damage": 18,
+    "door_attack_cooldown": 0.7,
+    "ability_cooldown": 12.0,
+    "ability_duration": 2.5,
+    "ability_speed_multiplier": 1.65
+  },
+  "room": {
+    "generation_interval": 1.2,
+    "door_max_health": 120,
+    "repair_amount": 30,
+    "repair_cost": 8,
+    "turret_cost": 35,
+    "turret_range": 190.0,
+    "turret_damage": 9,
+    "turret_cooldown": 0.5,
+    "ward_cost": 25,
+    "ward_range": 100.0,
+    "ward_damage": 5,
+    "ward_cooldown": 1.0
+  }
+}
