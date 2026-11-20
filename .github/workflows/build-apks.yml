@@ -32,13 +32,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Android packages and debug keystore
         run: |
-          yes | sdkmanager --licenses > /dev/null
-          sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -1)"
+          yes | "$SDKMANAGER" --licenses > /dev/null
+          "$SDKMANAGER" "platform-tools" "build-tools;34.0.0" "platforms;android-34"
           mkdir -p "$HOME/keystore"
           keytool -keyalg RSA -genkeypair \
             -alias androiddebugkey \
@@ -47,6 +45,7 @@ jobs:
             -storepass android \
             -dname "CN=Android Debug,O=Android,C=US" \
             -validity 9999 -size 2048 -deststoretype pkcs12
+          mkdir -p "$HOME/.config/godot"
           for name in editor_settings-4 editor_settings-4.3; do
             cat > "$HOME/.config/godot/$name.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
@@ -59,6 +58,9 @@ jobs:
           EOF
           done
           mkdir -p build
+
+      - name: Parse Godot project
+        run: ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
 
       - name: Export ARMv7 APK
         run: |

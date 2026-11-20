@@ -681,7 +681,7 @@ func _draw() -> void:
 		_draw_character(bot["position"], bot_color, ("SURVIVOR %d" % (index + 2)) if selected_role == ROLE_HUNTER else ("ALLY %d" % (index + 1)))
 		if bot_state == "active":
 			draw_rect(Rect2(bot["position"] + Vector2(-18, 19), Vector2(36, 4)), Color("#342f37"))
-			draw_rect(Rect2(bot["position"] + Vector2(-18, 19), Vector2(36.0 * float(bot["health"]) / balance.survivor.max_health, 4), Color("#719c89"))
+			draw_rect(Rect2(bot["position"] + Vector2(-18, 19), Vector2(36.0 * float(bot["health"]) / balance.survivor.max_health, 4)), Color("#719c89"))
 			if bot["objective_time"] > 0.0:
 				draw_string(font, bot["position"] + Vector2(-25, 32), "WORK", HORIZONTAL_ALIGNMENT_CENTER, 50, 9, Color("#dfbc77"))
 	var hunter_color := Color("#d4c26d") if hunter_stun_time > 0.0 else (Color("#c55a82") if hunter_ability_time > 0.0 else Color("#a43b67"))
