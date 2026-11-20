@@ -23,21 +23,22 @@
 - The project viewport and both Android export presets use portrait orientation at 540×960. World geometry, room traversal, objectives, exit, player/Hunter/bot spawns, defenses, setup choices, HUD, result overlay, joystick, and touch controls have been converted to portrait coordinates; setup/action controls share drawing and touch-hitbox constants.
 - Static portrait checks, six-bot doorway-to-objective-to-exit navigation, Hunter/exit separation, HUD/control bounds and spacing, `git diff --check`, `data/balance.json` parsing, gdtoolkit parsing of `main.gd`, and workflow YAML parsing pass. `gdlint` reports only long-line and `_interact` return-count style rules, also present in the committed baseline.
 - GitHub Actions run 44741160271 passed on portrait commit `b4c8cdd6fca0266c14c1648d33a39916a1afff12`: Godot 4.3 parsed the project and the headless startup smoke test emitted `NIGHTTERROR_READY` and `NIGHTTERROR_FIRST_FRAME`.
-- The validation workflow is being extended so pushes remain validation-only while manual dispatch validates first, then builds debug ARMv7/ARM64 test APKs and uploads them as 14-day Actions artifacts. It has no GitHub Release or external publishing step.
-- The user-reported black screen is not yet verified as fixed on Android. Device rendering, safe areas, touch alignment, and match start still need testing.
+- The current `.github/workflows/build-apks.yml` keeps pushes validation-only; manual dispatch validates first, then builds debug ARMv7/ARM64 APKs, checks ZIP integrity/signature/package/version/SDK/ABI, writes SHA-256 checksums, and uploads a 14-day Actions artifact. No GitHub Release or external publishing step exists.
+- GitHub Actions run `44749704663` on commit `c6133ec` passed headless parse/startup and both APK validation checks, uploading `NIGHTTERROR-device-test-11` (expires 2026-12-04). This validates CI artifacts only; it does not verify download integrity on the device, installation, Android rendering, safe areas, touch alignment, or match start.
+- The user later reported an extraction “data error” and Android’s “There was a problem while parsing the package” for ARMv7. Exact extractor/file, device API/ABI, and PackageManager logs are unavailable, so the cause and resolution are unverified. The earlier black-screen report is also unresolved.
 
 ### Known limitations
 
 - This remains a prototype, not the full MVP: no map selection or online mode. The AI team, two defense types, rescue flow, Hunter sprint, and the offline Hunter role are scripted offline practice systems, not networked multiplayer.
 - Gameplay, UI drawing, and input remain concentrated in `scripts/main.gd`.
-- Room entry/exit is gated at the room boundary by the doorway opening and door state, but collision, Hunter pathing/combat, objective interactions, and balance have not been playtested; no runtime validation has been possible. Hunter door and Survivor attacks use their separate configured cooldowns.
+- Room entry/exit is gated at the room boundary by the doorway opening and door state, but collision, Hunter pathing/combat, objective interactions, and balance have not been gameplay-playtested. Headless startup validation has run; no device gameplay validation is recorded. Hunter door and Survivor attacks use their separate configured cooldowns.
 - Match phases are `SETUP`, `PREPARATION`, `HUNT`, and `RESULT`: setup collects the role choice, the Survivor can move and prepare defenses during the 15-second countdown, while objectives, combat, turret fire, and Hunter updates are hunt-gated. Phase/timer resets and result classification have only been reviewed statically.
 - Room-boundary crossing is checked at the actual crossing point through the doorway opening; collision and movement have not been runtime-tested.
 - Export preset compatibility with a specific Godot release/export template is unverified.
 
 ### Next
 
-1. Run the validation-only headless startup workflow; do not generate or upload APKs until parsing, startup, and first-frame checks pass.
-2. After source validation, make an unpublished test build and verify portrait rendering, safe areas, touch alignment, and match start on the affected device.
-3. Capture Android runtime logs if the app still fails; Termux currently cannot read the app's logs.
+1. Verify the downloaded `NIGHTTERROR-device-test-11` APK against the artifact's `SHA256SUMS.txt`, then install the ABI-matching APK on the affected device.
+2. Check portrait rendering, safe areas, touch alignment, setup/role selection, and match start; do not claim the black-screen or package-parse issue is fixed until this succeeds.
+3. If extraction or launch still fails, capture the exact archive/APK error, Android version and supported ABI, plus Android runtime/PackageManager logs.
 4. Add broader offline match systems only after the current slice is runtime-validated.

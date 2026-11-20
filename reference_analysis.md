@@ -51,6 +51,6 @@ Evidence labels:
 
 Use only the high-level design pattern supported by the evidence: early location choice, room/door defense, resource investment, and pressure from a pursuing Hunter. NIGHTTERROR should use original maps, names, art, text, code, balance, and UI. Keep objectives and resource collection outside rooms central so remaining in one room is not always optimal. Treat reference-game numbers and labels as evidence to investigate, not as values or feature requirements to copy.
 
-## Repository audit snapshot
+## Repository and reference scope
 
-At the time of inspection, the repository root contains only `GAME PROMPT.MD` and `dynamic_game_haunted_dorm.zip`. No Godot project file, game source tree, dependency manifest, build configuration, or tests are present. Therefore there is no existing implementation to preserve or test; Phase 0 must establish and verify the project foundation before later phases can be claimed complete.
+This document records analysis of the cached reference archive, not a current inventory of the NIGHTTERROR project. The archive remains reference-only; it is not loaded by the game. For current source structure, implementation status, build workflow, and tests, see [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md), [`docs/FEATURE_STATUS.md`](docs/FEATURE_STATUS.md), and [`docs/BUILD_AND_DEPLOYMENT.md`](docs/BUILD_AND_DEPLOYMENT.md). The repository has since gained a Godot project; the historical initial repository state is available in Git history.

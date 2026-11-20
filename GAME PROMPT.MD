@@ -156,7 +156,7 @@ PART 3 — REFERENCE GAMEPLAY UNDERSTANDING
 
 A checked-in analysis of the actual cached build is maintained in `reference_analysis.md`. Read it before using reference-game findings. The report labels each finding VERIFIED, STRONGLY INDICATED, or UNKNOWN and records the limitations of the minified bundle. Keep it updated when further files or runtime behavior are inspected; do not promote hypotheses to facts without evidence.
 
-Repository audit at the time of writing: the root contains this prompt and the reference ZIP, but no Godot project, source tree, dependencies, build configuration, or tests. Treat this as an empty implementation repository, not as an existing game codebase to preserve. Begin with Phase 0's documented foundation and verify tools and requirements before claiming the project opens or runs.
+Historical repository audit (superseded): when this prompt was first written, the repository contained the prompt and reference ZIP but no Godot implementation. The current project has since been established; its verified source, current implementation status, build process, and limitations are documented in `docs/PROJECT_OVERVIEW.md` and `docs/FEATURE_STATUS.md`. Treat this prompt's feature requirements as design intent, not as an inventory of implemented functionality. Verify current source and tooling before claiming the project opens, runs, or meets a requirement.
 
 The reference archive provides evidence of a strategic loop built around room security, resource generation, construction, upgrades and surviving a pursuing Hunter.
 
