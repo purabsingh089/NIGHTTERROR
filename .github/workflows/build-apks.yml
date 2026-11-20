@@ -87,11 +87,30 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: ./Godot_v4.3-stable_linux.x86_64 --verbose --headless --path . --export-debug "Android ARM64" build/NIGHTTERROR-arm64.apk
 
-      - name: Verify test APKs
+      - name: Verify test APKs and generate checksums
         if: github.event_name == 'workflow_dispatch'
         run: |
-          test -s build/NIGHTTERROR-armv7.apk
-          test -s build/NIGHTTERROR-arm64.apk
+          set -euo pipefail
+          validate_apk() {
+            local apk="$1"
+            local abi="$2"
+            test -s "$apk"
+            unzip -t "$apk"
+            "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose "$apk"
+            local badging
+            badging="$("$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$apk")"
+            printf '%s\n' "$badging" | grep -Fq "package: name='com.nightterror.game' versionCode='1' versionName='0.1.0'"
+            printf '%s\n' "$badging" | grep -Eq "^sdkVersion:'[0-9]+'$"
+            printf '%s\n' "$badging" | grep -Eq "^targetSdkVersion:'[0-9]+'$"
+            printf '%s\n' "$badging" | grep -Fxq "native-code: '$abi'"
+          }
+          validate_apk build/NIGHTTERROR-armv7.apk armeabi-v7a
+          validate_apk build/NIGHTTERROR-arm64.apk arm64-v8a
+          (
+            cd build
+            sha256sum NIGHTTERROR-armv7.apk NIGHTTERROR-arm64.apk > SHA256SUMS.txt
+            cat SHA256SUMS.txt
+          )
 
       - name: Upload test APK artifacts
         if: github.event_name == 'workflow_dispatch'
@@ -101,5 +120,6 @@ jobs:
           path: |
             build/NIGHTTERROR-armv7.apk
             build/NIGHTTERROR-arm64.apk
+            build/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
