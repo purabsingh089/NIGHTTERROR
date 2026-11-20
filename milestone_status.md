@@ -19,8 +19,9 @@
 
 - Offline team-mode source checks verify seven total Survivors, six bots, proximity-gated objective channeling, damage interruption, bot flee behavior, nearest-active-target selection, individual elimination, bot defense attacks, rescue state reset, two player defenses, Hunter sprint and stun state, hunt timeout result, combat target/health HUD, result detail display, four-escape victory, full-team elimination, and restart state reset; balance JSON validation, simulation checks, and `git diff --check` passed.
 - Offline role checks verify the setup phase exists, both role constants are wired, keyboard (1/2) and touch role selection work only during setup, the touch start hitbox matches the drawn Start button, Hunter movement is gated while stunned, `_hunter_attack_nearby` exists with the stun gate, `_begin_match` transitions SETUP to PREPARATION with fresh timers, `_reset_match` clears `primary_objective_time`/`primary_attack_time`, HUD role/health/target labels adapt to the selected role, restart returns to setup, and no unsupported draw calls or direct Hunter position writes remain; 12/12 wiring checks and 13/13 gameplay invariants pass.
-- Godot parsing, runtime gameplay, save/load on device, APK export, and installation have **not** been tested. This Termux environment has no Godot executable, Java, Android SDK, Gradle, or ADB, and the available Termux package index did not offer Godot.
-- Do not treat the export presets as proof that APKs have been built. A supported Godot 4 + Android export-template + JDK/Android SDK host is required.
+- GitHub Actions run 44712936748 successfully parsed the project, exported and signed both ARMv7 and ARM64 APKs, and verified both files. The user installed the ARMv7 APK; it showed the Godot splash and then a black screen.
+- The project canvas is 960×540 landscape, but the project and both Android export presets selected portrait. They now select landscape. Startup reports missing or invalid balance JSON on-screen instead of silently returning, and the validation workflow requires a headless `NIGHTTERROR_READY` marker.
+- The updated orientation and startup diagnostics have not yet been run through CI or tested on-device. Termux cannot read the app's Android logs or capture the display, so the exact original runtime failure is not confirmed. No new APK is being uploaded or released while the startup issue is under investigation.
 
 ### Known limitations
 
@@ -33,6 +34,7 @@
 
 ### Next
 
-1. Open/import in Godot 4; fix parser issues and test the objective, doorway, match, and save flows.
-2. Export and install separate ARMv7 and ARM64 APKs on matching devices/emulators.
-3. Add broader offline match systems only after this slice is validated.
+1. Run the headless startup validation after the orientation and startup-diagnostic changes; do not generate or upload APKs until it passes.
+2. Rebuild and reinstall ARMv7 on the affected device only after startup validation passes, then verify the landscape UI and match start.
+3. Capture Android runtime logs if the app still fails after the orientation fix; Termux currently cannot read the app's logs.
+4. Add broader offline match systems only after the current slice is runtime-validated.

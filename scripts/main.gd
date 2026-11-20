@@ -14,6 +14,8 @@ const OBJECTIVE_POSITIONS := [Vector2(610, 230), Vector2(610, 410)]
 const EXIT_POSITION := Vector2(850, 270)
 
 var balance: Dictionary
+var startup_error := ""
+var first_frame_drawn := false
 var profile := {"version": 1, "survivor_escapes": 0, "hunter_wins": 0}
 var resources := 45
 var survivor_health := 100
@@ -53,20 +55,34 @@ var hunter_target_bot_index := -1
 var font: Font
 
 func _ready() -> void:
+	font = ThemeDB.fallback_font
+	set_process(true)
+	set_process_input(true)
 	var file := FileAccess.open(BALANCE_PATH, FileAccess.READ)
 	if file == null:
-		push_error("Could not read balance data")
+		startup_error = "Could not open %s" % BALANCE_PATH
+		push_error(startup_error)
 		return
-	balance = JSON.parse_string(file.get_as_text())
+	var parser := JSON.new()
+	if parser.parse(file.get_as_text()) != OK:
+		startup_error = "Invalid balance data at line %d: %s" % [parser.get_error_line(), parser.get_error_message()]
+		push_error(startup_error)
+		return
+	if not parser.data is Dictionary:
+		startup_error = "Balance data must be a JSON object"
+		push_error(startup_error)
+		return
+	balance = parser.data
 	_load_profile()
-	font = ThemeDB.fallback_font
 	_setup_input_actions()
 	_reset_match()
 	match_phase = PHASE_SETUP
-	set_process(true)
-	set_process_input(true)
+	print("NIGHTTERROR_READY")
 
 func _process(delta: float) -> void:
+	if not startup_error.is_empty():
+		queue_redraw()
+		return
 	if game_over:
 		queue_redraw()
 		return
@@ -320,6 +336,8 @@ func _setup_input_actions() -> void:
 			InputMap.action_add_event(action, key_event)
 
 func _input(event: InputEvent) -> void:
+	if not startup_error.is_empty():
+		return
 	if event is InputEventScreenTouch:
 		if event.pressed and match_phase != PHASE_SETUP and event.position.x < 300 and event.position.y > 300 and stick_touch == -1:
 			stick_touch = event.index
@@ -666,6 +684,17 @@ func _reset_match() -> void:
 	stick_touch = -1
 
 func _draw() -> void:
+	if not startup_error.is_empty():
+		if not first_frame_drawn:
+			first_frame_drawn = true
+			print("NIGHTTERROR_FIRST_FRAME_ERROR")
+		draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color("#121318"))
+		draw_string(font, Vector2(48, 100), "NIGHTTERROR COULD NOT START", HORIZONTAL_ALIGNMENT_LEFT, 860, 24, Color("#efc9d2"))
+		draw_string(font, Vector2(48, 145), startup_error, HORIZONTAL_ALIGNMENT_LEFT, 860, 16, Color("#c9bdc7"))
+		return
+	if not first_frame_drawn:
+		first_frame_drawn = true
+		print("NIGHTTERROR_FIRST_FRAME")
 	_draw_map()
 	_draw_objectives()
 	if selected_role == ROLE_HUNTER:
