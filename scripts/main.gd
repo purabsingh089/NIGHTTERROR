@@ -103,7 +103,7 @@ func _process(delta: float) -> void:
 	move_input = _get_movement_input()
 	if selected_role == ROLE_HUNTER:
 		if hunter_stun_time <= 0.0:
-			var hunter_speed := balance.hunter.speed
+			var hunter_speed: float = float(balance.hunter.speed)
 			if hunter_ability_time > 0.0:
 				hunter_speed *= balance.hunter.ability_speed_multiplier
 			hunter_position = _move_survivor(hunter_position, move_input, hunter_speed, delta)
@@ -135,7 +135,7 @@ func _update_survivor_defenses() -> void:
 func _update_primary_survivor(delta: float) -> void:
 	if not survivor_alive or survivor_escaped:
 		return
-	var fleeing := player_position.distance_to(hunter_position) < balance["match"]["bot_flee_radius"]
+	var fleeing: bool = player_position.distance_to(hunter_position) < balance["match"]["bot_flee_radius"]
 	var objective_index := 0 if not objectives_complete[0] else 1
 	var target_position: Vector2 = EXIT_POSITION if _objectives_done() else OBJECTIVE_POSITIONS[objective_index]
 	if fleeing:
@@ -156,7 +156,7 @@ func _update_primary_survivor(delta: float) -> void:
 		target_position = Vector2(ROOM_RECT.end.x + 50.0, DOOR_RECT.get_center().y)
 		if player_position.distance_to(DOOR_RECT.get_center()) < 52.0:
 			door_open_time = maxf(door_open_time, 0.8)
-	var speed := balance["match"]["bot_speed"]
+	var speed: float = float(balance["match"]["bot_speed"])
 	if fleeing:
 		speed *= balance["match"]["bot_flee_speed_multiplier"]
 	player_position = _move_survivor(player_position, (target_position - player_position).normalized(), speed, delta)
@@ -230,7 +230,7 @@ func _update_survivor_bots(delta: float) -> void:
 			survivor_bots[index] = bot
 			continue
 		var bot_position: Vector2 = bot["position"]
-		var fleeing := bot_position.distance_to(hunter_position) < balance["match"]["bot_flee_radius"]
+		var fleeing: bool = bot_position.distance_to(hunter_position) < balance["match"]["bot_flee_radius"]
 		var objective_index: int = bot["objective"]
 		if not fleeing and not _objectives_done() and objectives_complete[objective_index]:
 			objective_index = (objective_index + 1) % OBJECTIVE_POSITIONS.size()
@@ -273,7 +273,7 @@ func _update_survivor_bots(delta: float) -> void:
 		if working_on_objective:
 			movement_target = bot_position
 		var direction := (movement_target - bot_position).normalized()
-		var bot_speed := balance["match"]["bot_speed"]
+		var bot_speed: float = float(balance["match"]["bot_speed"])
 		if fleeing:
 			bot_speed *= balance["match"]["bot_flee_speed_multiplier"]
 		bot_position = _move_survivor(bot_position, direction, bot_speed, delta)
@@ -530,12 +530,12 @@ func _update_hunter(delta: float) -> void:
 		if hunter_ability_time <= 0.0 and hunter_ability_cooldown <= 0.0 and hunter_position.distance_to(target_position) > 120.0:
 			hunter_ability_time = balance.hunter.ability_duration
 			hunter_ability_cooldown = balance.hunter.ability_cooldown
-		var hunter_speed := balance.hunter.speed
+		var hunter_speed: float = float(balance.hunter.speed)
 		if hunter_ability_time > 0.0:
 			hunter_speed *= balance.hunter.ability_speed_multiplier
 		hunter_position = _move_survivor(hunter_position, (target_position - hunter_position).normalized(), hunter_speed, delta)
 		return
-	var attack_cooldown := balance.hunter.door_attack_cooldown if hunter_target == "door" else balance.hunter.attack_cooldown
+	var attack_cooldown: float = float(balance.hunter.door_attack_cooldown if hunter_target == "door" else balance.hunter.attack_cooldown)
 	if hunter_attack_time < attack_cooldown:
 		return
 	hunter_attack_time = 0.0
@@ -756,12 +756,12 @@ func _draw_hud() -> void:
 	draw_string(font, Vector2(394, 50), "ENTRY BARRIER  %d / %d" % [door_health, balance.room.door_max_health], HORIZONTAL_ALIGNMENT_LEFT, 205, 12, Color("#a99ba4"))
 	var hunter_speed_label := "SPRINT" if hunter_ability_time > 0.0 else "READY" if hunter_ability_cooldown <= 0.0 else "COOLDOWN %02d" % ceili(hunter_ability_cooldown)
 	draw_string(font, Vector2(394, 72), "HUNTER ABILITY  %s" % hunter_speed_label, HORIZONTAL_ALIGNMENT_LEFT, 205, 12, Color("#c989a4"))
-	var health_bar_value := float(hunter_health) / balance.hunter.max_health if selected_role == ROLE_HUNTER else float(survivor_health) / balance.survivor.max_health
+	var health_bar_value: float = float(hunter_health) / float(balance.hunter.max_health) if selected_role == ROLE_HUNTER else float(survivor_health) / float(balance.survivor.max_health)
 	var health_bar_color := Color("#c989a4") if selected_role == ROLE_HUNTER else Color("#719c89")
 	draw_rect(Rect2(394, 88, 192, 8), Color("#342f37"))
 	draw_rect(Rect2(394, 88, 192.0 * health_bar_value, 8), health_bar_color)
 	var health_title := "HUNTER HEALTH" if selected_role == ROLE_HUNTER else "YOU HEALTH"
-	var health_max := balance.hunter.max_health if selected_role == ROLE_HUNTER else balance.survivor.max_health
+	var health_max: int = int(balance.hunter.max_health if selected_role == ROLE_HUNTER else balance.survivor.max_health)
 	var health_current := hunter_health if selected_role == ROLE_HUNTER else survivor_health
 	draw_string(font, Vector2(394, 112), "%s  %d / %d" % [health_title, health_current, health_max], HORIZONTAL_ALIGNMENT_LEFT, 205, 12, health_bar_color)
 	draw_string(font, Vector2(394, 134), _hunter_target_label(), HORIZONTAL_ALIGNMENT_LEFT, 205, 12, Color("#c989a4"))

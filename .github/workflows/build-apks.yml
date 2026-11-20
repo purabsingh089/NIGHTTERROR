@@ -60,7 +60,12 @@ jobs:
           mkdir -p build
 
       - name: Parse Godot project
-        run: ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
+        run: |
+          set -o pipefail
+          ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit 2>&1 | tee godot-import.log
+          if grep -E "SCRIPT ERROR:|ERROR: Failed to load script" godot-import.log; then
+            exit 1
+          fi
 
       - name: Export ARMv7 APK
         run: |
