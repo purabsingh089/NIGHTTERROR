@@ -7,11 +7,24 @@ const PHASE_HUNT := "HUNT"
 const PHASE_RESULT := "RESULT"
 const ROLE_SURVIVOR := "SURVIVOR"
 const ROLE_HUNTER := "HUNTER"
-const MAP_SIZE := Vector2(960, 540)
-const ROOM_RECT := Rect2(80, 70, 300, 400)
-const DOOR_RECT := Rect2(380, 235, 24, 70)
-const OBJECTIVE_POSITIONS := [Vector2(610, 230), Vector2(610, 410)]
-const EXIT_POSITION := Vector2(850, 270)
+const MAP_SIZE := Vector2(540, 960)
+const ROOM_RECT := Rect2(70, 190, 400, 250)
+const DOOR_RECT := Rect2(230, 440, 80, 24)
+const OBJECTIVE_POSITIONS := [Vector2(150, 590), Vector2(390, 590)]
+const EXIT_POSITION := Vector2(270, 690)
+const TURRET_POSITION := Vector2(155, 270)
+const WARD_POSITION := Vector2(385, 350)
+const SURVIVOR_START_POSITION := Vector2(270, 315)
+const HUNTER_START_POSITION := Vector2(270, 510)
+const REST_CHAMBER_RECT := Rect2(100, 220, 140, 70)
+const NORTH_WING_RECT := Rect2(90, 500, 180, 64)
+const DORMITORY_RECT := Rect2(280, 500, 170, 64)
+const SETUP_SURVIVOR_BUTTON := Rect2(80, 350, 380, 76)
+const SETUP_HUNTER_BUTTON := Rect2(80, 450, 380, 76)
+const SETUP_START_BUTTON := Rect2(80, 700, 380, 76)
+const ATTACK_BUTTON := Rect2(320, 800, 200, 62)
+const INTERACT_BUTTON := Rect2(320, 880, 200, 62)
+const JOYSTICK_TOUCH_AREA := Rect2(0, 835, 260, 125)
 
 var balance: Dictionary
 var startup_error := ""
@@ -48,8 +61,8 @@ var ward_attack_time := 0.0
 var stick_origin := Vector2.ZERO
 var stick_touch := -1
 var move_input := Vector2.ZERO
-var player_position := Vector2(240, 275)
-var hunter_position := Vector2(760, 270)
+var player_position := SURVIVOR_START_POSITION
+var hunter_position := HUNTER_START_POSITION
 var hunter_target := "door"
 var hunter_target_bot_index := -1
 var font: Font
@@ -138,11 +151,10 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _update_survivor_defenses() -> void:
-	var turret_position := Vector2(300, 210)
-	if turret_built and turret_attack_time >= balance.room.turret_cooldown and turret_position.distance_to(hunter_position) <= balance.room.turret_range:
+	if turret_built and turret_attack_time >= balance.room.turret_cooldown and TURRET_POSITION.distance_to(hunter_position) <= balance.room.turret_range:
 		turret_attack_time = 0.0
 		hunter_health = maxi(hunter_health - balance.room.turret_damage, 0)
-	if ward_built and ward_attack_time >= balance.room.ward_cooldown and Vector2(350, 390).distance_to(hunter_position) <= balance.room.ward_range:
+	if ward_built and ward_attack_time >= balance.room.ward_cooldown and WARD_POSITION.distance_to(hunter_position) <= balance.room.ward_range:
 		ward_attack_time = 0.0
 		hunter_health = maxi(hunter_health - balance.room.ward_damage, 0)
 	if hunter_health == 0:
@@ -169,7 +181,7 @@ func _update_primary_survivor(delta: float) -> void:
 		_check_team_result()
 		return
 	if not fleeing and ROOM_RECT.has_point(player_position):
-		target_position = Vector2(ROOM_RECT.end.x + 50.0, DOOR_RECT.get_center().y)
+		target_position = Vector2(DOOR_RECT.get_center().x, ROOM_RECT.end.y + 50.0)
 		if player_position.distance_to(DOOR_RECT.get_center()) < 52.0:
 			door_open_time = maxf(door_open_time, 0.8)
 	var speed: float = float(balance["match"]["bot_speed"])
@@ -233,7 +245,7 @@ func _reset_survivor_team() -> void:
 	for index in range(balance["match"]["survivor_team_size"] - 1):
 		var row := index / 3
 		var column := index % 3
-		var bot_position := Vector2(145 + column * 82, 185 + row * 135)
+		var bot_position := Vector2(145 + column * 125, 245 + row * 145)
 		survivor_bots.append({"position": bot_position, "health": balance.survivor.max_health, "state": "active", "objective": index % OBJECTIVE_POSITIONS.size(), "objective_time": 0.0, "attack_time": 0.0})
 
 func _update_survivor_bots(delta: float) -> void:
@@ -275,7 +287,7 @@ func _update_survivor_bots(delta: float) -> void:
 		if fleeing:
 			movement_target = bot_position + (bot_position - hunter_position).normalized() * 120.0
 		elif ROOM_RECT.has_point(bot_position):
-			movement_target = Vector2(430, DOOR_RECT.get_center().y)
+			movement_target = Vector2(DOOR_RECT.get_center().x, ROOM_RECT.end.y + 50.0)
 			if bot_position.distance_to(DOOR_RECT.get_center()) < 52.0:
 				door_open_time = maxf(door_open_time, 0.8)
 		elif working_on_objective:
@@ -339,28 +351,29 @@ func _input(event: InputEvent) -> void:
 	if not startup_error.is_empty():
 		return
 	if event is InputEventScreenTouch:
-		if event.pressed and match_phase != PHASE_SETUP and event.position.x < 300 and event.position.y > 300 and stick_touch == -1:
+		var touch_position := _screen_to_canvas(event.position)
+		if event.pressed and match_phase != PHASE_SETUP and JOYSTICK_TOUCH_AREA.has_point(touch_position) and stick_touch == -1:
 			stick_touch = event.index
-			stick_origin = event.position
+			stick_origin = touch_position
 			move_input = Vector2.ZERO
 		elif not event.pressed and event.index == stick_touch:
 			stick_touch = -1
 			move_input = Vector2.ZERO
 		elif event.pressed:
-			_handle_action_touch(event.position)
+			_handle_action_touch(touch_position)
 	elif event is InputEventScreenDrag and event.index == stick_touch:
-		move_input = (event.position - stick_origin).limit_length(55.0) / 55.0
+		move_input = (_screen_to_canvas(event.position) - stick_origin).limit_length(55.0) / 55.0
 	elif event is InputEventMouseButton:
-		if event.pressed and event.position.x < 300 and event.position.y > 300:
-			stick_origin = event.position
+		var mouse_position := _screen_to_canvas(event.position)
+		if event.pressed and match_phase != PHASE_SETUP and JOYSTICK_TOUCH_AREA.has_point(mouse_position):
+			stick_origin = mouse_position
 		elif event.pressed:
-			_handle_action_touch(event.position)
+			_handle_action_touch(mouse_position)
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			move_input = Vector2.ZERO
 			stick_origin = Vector2.ZERO
 	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and stick_origin != Vector2.ZERO:
-		if stick_origin.x < 300 and stick_origin.y > 300:
-			move_input = (event.position - stick_origin).limit_length(55.0) / 55.0
+		move_input = (_screen_to_canvas(event.position) - stick_origin).limit_length(55.0) / 55.0
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if match_phase == PHASE_SETUP and event.keycode == KEY_1:
 			selected_role = ROLE_SURVIVOR
@@ -377,18 +390,21 @@ func _get_movement_input() -> Vector2:
 		return direction
 	return move_input
 
+func _screen_to_canvas(screen_position: Vector2) -> Vector2:
+	return get_viewport().get_canvas_transform().affine_inverse() * screen_position
+
 func _handle_action_touch(position: Vector2) -> void:
 	if match_phase == PHASE_SETUP:
-		if Rect2(110, 245, 300, 80).has_point(position):
+		if SETUP_SURVIVOR_BUTTON.has_point(position):
 			selected_role = ROLE_SURVIVOR
-		elif Rect2(550, 245, 300, 80).has_point(position):
+		elif SETUP_HUNTER_BUTTON.has_point(position):
 			selected_role = ROLE_HUNTER
-		elif Rect2(320, 410, 320, 70).has_point(position):
+		elif SETUP_START_BUTTON.has_point(position):
 			_begin_match()
 		return
-	if Rect2(748, 386, 190, 60).has_point(position):
+	if ATTACK_BUTTON.has_point(position):
 		_attack()
-	elif Rect2(748, 456, 190, 60).has_point(position):
+	elif INTERACT_BUTTON.has_point(position):
 		_interact()
 
 func _interact() -> void:
@@ -578,12 +594,12 @@ func _can_enter_position(position: Vector2, previous_position: Vector2) -> bool:
 	var inside_room := ROOM_RECT.has_point(position)
 	var was_inside_room := ROOM_RECT.has_point(previous_position)
 	if was_inside_room != inside_room:
-		var crossed_door_wall := (previous_position.x < ROOM_RECT.end.x and position.x >= ROOM_RECT.end.x) or (previous_position.x >= ROOM_RECT.end.x and position.x < ROOM_RECT.end.x)
+		var crossed_door_wall := (previous_position.y < ROOM_RECT.end.y and position.y >= ROOM_RECT.end.y) or (previous_position.y >= ROOM_RECT.end.y and position.y < ROOM_RECT.end.y)
 		if not crossed_door_wall:
 			return false
-		var crossing_fraction := (ROOM_RECT.end.x - previous_position.x) / (position.x - previous_position.x)
-		var crossing_y := lerpf(previous_position.y, position.y, crossing_fraction)
-		var at_doorway := crossing_y >= DOOR_RECT.position.y and crossing_y <= DOOR_RECT.end.y
+		var crossing_fraction := (ROOM_RECT.end.y - previous_position.y) / (position.y - previous_position.y)
+		var crossing_x := lerpf(previous_position.x, position.x, crossing_fraction)
+		var at_doorway := crossing_x >= DOOR_RECT.position.x and crossing_x <= DOOR_RECT.end.x
 		if not at_doorway or (door_health > 0 and door_open_time <= 0.0):
 			return false
 	return true
@@ -671,8 +687,8 @@ func _reset_match() -> void:
 	objectives_complete = [false, false]
 	turret_built = false
 	ward_built = false
-	player_position = Vector2(240, 275)
-	hunter_position = Vector2(760, 270)
+	player_position = SURVIVOR_START_POSITION
+	hunter_position = HUNTER_START_POSITION
 	hunter_target = "door"
 	hunter_target_bot_index = -1
 	_reset_survivor_team()
@@ -689,8 +705,8 @@ func _draw() -> void:
 			first_frame_drawn = true
 			print("NIGHTTERROR_FIRST_FRAME_ERROR")
 		draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color("#121318"))
-		draw_string(font, Vector2(48, 100), "NIGHTTERROR COULD NOT START", HORIZONTAL_ALIGNMENT_LEFT, 860, 24, Color("#efc9d2"))
-		draw_string(font, Vector2(48, 145), startup_error, HORIZONTAL_ALIGNMENT_LEFT, 860, 16, Color("#c9bdc7"))
+		draw_string(font, Vector2(24, 100), "NIGHTTERROR COULD NOT START", HORIZONTAL_ALIGNMENT_LEFT, 492, 20, Color("#efc9d2"))
+		draw_string(font, Vector2(24, 145), startup_error, HORIZONTAL_ALIGNMENT_LEFT, 492, 14, Color("#c9bdc7"))
 		return
 	if not first_frame_drawn:
 		first_frame_drawn = true
@@ -720,41 +736,41 @@ func _draw() -> void:
 	if hunter_ability_time > 0.0:
 		draw_arc(hunter_position, 24.0, 0.0, TAU, 32, Color("#e59bb5"), 3.0)
 	if turret_built:
-		draw_circle(Vector2(300, 210), 15, Color("#dcad67"))
-		draw_arc(Vector2(300, 210), balance.room.turret_range, 0.0, TAU, 64, Color(0.86, 0.68, 0.4, 0.12), 1.0)
+		draw_circle(TURRET_POSITION, 15, Color("#dcad67"))
+		draw_arc(TURRET_POSITION, balance.room.turret_range, 0.0, TAU, 64, Color(0.86, 0.68, 0.4, 0.12), 1.0)
 	if ward_built:
-		draw_circle(Vector2(350, 390), 12, Color("#7aa4b0"))
-		draw_arc(Vector2(350, 390), balance.room.ward_range, 0.0, TAU, 48, Color(0.38, 0.64, 0.7, 0.12), 1.0)
+		draw_circle(WARD_POSITION, 12, Color("#7aa4b0"))
+		draw_arc(WARD_POSITION, balance.room.ward_range, 0.0, TAU, 48, Color(0.38, 0.64, 0.7, 0.12), 1.0)
 	_draw_hud()
 
 func _draw_map() -> void:
 	draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color("#121318"))
-	for x in range(0, 961, 48):
-		draw_line(Vector2(x, 0), Vector2(x, 540), Color(1, 1, 1, 0.025), 1.0)
-	for y in range(0, 541, 48):
-		draw_line(Vector2(0, y), Vector2(960, y), Color(1, 1, 1, 0.025), 1.0)
+	for x in range(0, int(MAP_SIZE.x) + 1, 36):
+		draw_line(Vector2(x, 0), Vector2(x, MAP_SIZE.y), Color(1, 1, 1, 0.025), 1.0)
+	for y in range(0, int(MAP_SIZE.y) + 1, 48):
+		draw_line(Vector2(0, y), Vector2(MAP_SIZE.x, y), Color(1, 1, 1, 0.025), 1.0)
 	draw_rect(ROOM_RECT, Color("#29272d"))
 	draw_rect(ROOM_RECT, Color("#594b55"), false, 4.0)
-	draw_rect(Rect2(110, 100, 100, 55), Color("#302b37"))
-	draw_string(font, Vector2(122, 134), "REST CHAMBER", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#b9a2b1"))
-	draw_string(font, Vector2(240, 225), "SAFE ROOM", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("#847b84"))
+	draw_rect(REST_CHAMBER_RECT, Color("#302b37"))
+	draw_string(font, REST_CHAMBER_RECT.position + Vector2(8, 42), "REST CHAMBER", HORIZONTAL_ALIGNMENT_LEFT, REST_CHAMBER_RECT.size.x - 16, 13, Color("#b9a2b1"))
+	draw_string(font, Vector2(170, 365), "SAFE ROOM", HORIZONTAL_ALIGNMENT_LEFT, 200, 18, Color("#847b84"))
 	draw_rect(DOOR_RECT, Color("#6f4846") if door_health > 0 else Color("#252329"))
 	if door_open_time > 0.0:
 		draw_rect(DOOR_RECT, Color(0.72, 0.65, 0.48, 0.35))
-	draw_rect(Rect2(590, 180, 190, 150), Color("#1d1c22"), false, 2.0)
-	draw_string(font, Vector2(635, 168), "NORTH WING", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#6f6874"))
-	draw_rect(Rect2(515, 400, 160, 80), Color("#201d25"), false, 2.0)
-	draw_string(font, Vector2(548, 444), "DORMITORY", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#6f6874"))
+	draw_rect(NORTH_WING_RECT, Color("#1d1c22"), false, 2.0)
+	draw_string(font, NORTH_WING_RECT.position + Vector2(20, 38), "NORTH WING", HORIZONTAL_ALIGNMENT_LEFT, NORTH_WING_RECT.size.x - 40, 14, Color("#6f6874"))
+	draw_rect(DORMITORY_RECT, Color("#201d25"), false, 2.0)
+	draw_string(font, DORMITORY_RECT.position + Vector2(20, 38), "DORMITORY", HORIZONTAL_ALIGNMENT_LEFT, DORMITORY_RECT.size.x - 40, 13, Color("#6f6874"))
 
 func _draw_objectives() -> void:
-	var positions := [Vector2(610, 230), Vector2(610, 410)]
-	for index in range(positions.size()):
+	for index in range(OBJECTIVE_POSITIONS.size()):
+		var position: Vector2 = OBJECTIVE_POSITIONS[index]
 		var color := Color("#719c89") if objectives_complete[index] else Color("#c39a5e")
-		draw_circle(positions[index], 18, color)
-		draw_string(font, positions[index] + Vector2(-44, -28), "POWER %d" % (index + 1), HORIZONTAL_ALIGNMENT_CENTER, 88, 11, Color("#d8cbd3"))
+		draw_circle(position, 18, color)
+		draw_string(font, position + Vector2(-44, -28), "POWER %d" % (index + 1), HORIZONTAL_ALIGNMENT_CENTER, 88, 11, Color("#d8cbd3"))
 	var exit_color := Color("#719c89") if _objectives_done() else Color("#714b56")
-	draw_rect(Rect2(820, 232, 60, 76), exit_color, false, 3.0)
-	draw_string(font, Vector2(806, 222), "EXIT", HORIZONTAL_ALIGNMENT_LEFT, 90, 12, Color("#d8cbd3"))
+	draw_rect(Rect2(EXIT_POSITION + Vector2(-34, -32), Vector2(68, 64)), exit_color, false, 3.0)
+	draw_string(font, EXIT_POSITION + Vector2(-34, -42), "EXIT", HORIZONTAL_ALIGNMENT_CENTER, 68, 12, Color("#d8cbd3"))
 
 func _draw_character(position: Vector2, color: Color, label: String) -> void:
 	draw_circle(position + Vector2(2, 5), 18, Color(0, 0, 0, 0.38))
@@ -766,69 +782,65 @@ func _draw_hud() -> void:
 	if match_phase == PHASE_SETUP:
 		_draw_setup_screen()
 		return
-	draw_rect(Rect2(14, 14, 330, 138), Color(0.04, 0.04, 0.06, 0.86))
+	draw_rect(Rect2(12, 12, 516, 176), Color(0.04, 0.04, 0.06, 0.9))
 	var timer_label := "PREP %02d" % ceili(preparation_time_left) if match_phase == PHASE_PREPARATION else "HUNT %03d" % ceili(hunt_time_left)
 	var role_label := "SURVIVOR" if selected_role == ROLE_SURVIVOR else "HUNTER"
-	draw_string(font, Vector2(28, 40), "NIGHTTERROR  /  %s  /  %s" % [role_label, timer_label], HORIZONTAL_ALIGNMENT_LEFT, 300, 14, Color("#dfc7d0"))
-	draw_string(font, Vector2(28, 65), "ENERGY  %d" % resources, HORIZONTAL_ALIGNMENT_LEFT, 130, 16, Color("#dfbc77"))
+	draw_string(font, Vector2(24, 36), "NIGHTTERROR  /  %s" % role_label, HORIZONTAL_ALIGNMENT_LEFT, 330, 15, Color("#dfc7d0"))
+	draw_string(font, Vector2(24, 61), timer_label, HORIZONTAL_ALIGNMENT_LEFT, 180, 16, Color("#dfbc77"))
+	draw_string(font, Vector2(240, 61), "ENERGY  %d" % resources, HORIZONTAL_ALIGNMENT_LEFT, 180, 15, Color("#dfbc77"))
 	var health_label := "HUNTER %d    TARGET %d" % [hunter_health, survivor_health] if selected_role == ROLE_HUNTER else "YOU %d    HUNTER %d" % [survivor_health, hunter_health]
-	draw_string(font, Vector2(28, 91), health_label, HORIZONTAL_ALIGNMENT_LEFT, 280, 13, Color("#c0b9c2"))
-	draw_string(font, Vector2(28, 116), "TEAM  %d ACTIVE  %d OUT  %d LOST" % [_active_survivor_count(), _escaped_survivor_count(), _eliminated_survivor_count()], HORIZONTAL_ALIGNMENT_LEFT, 300, 12, Color("#a89da8"))
+	draw_string(font, Vector2(24, 88), health_label, HORIZONTAL_ALIGNMENT_LEFT, 490, 13, Color("#c0b9c2"))
+	draw_string(font, Vector2(24, 111), "TEAM  %d ACTIVE  %d OUT  %d LOST" % [_active_survivor_count(), _escaped_survivor_count(), _eliminated_survivor_count()], HORIZONTAL_ALIGNMENT_LEFT, 490, 12, Color("#a89da8"))
 	var objective_progress := ""
 	for bot in survivor_bots:
 		if bot["state"] == "active" and bot["objective_time"] > 0.0:
-			objective_progress = "   WORK %d%%" % roundi(100.0 * bot["objective_time"] / balance["match"]["bot_objective_seconds"])
+			objective_progress = " WORK %d%%" % roundi(100.0 * bot["objective_time"] / balance["match"]["bot_objective_seconds"])
 			break
-	draw_string(font, Vector2(28, 140), "POWER %s   EXIT %s%s" % ["2/2" if _objectives_done() else ("1/2" if objectives_complete[0] or objectives_complete[1] else "0/2"), "OPEN" if _objectives_done() else "LOCKED", objective_progress], HORIZONTAL_ALIGNMENT_LEFT, 300, 12, Color("#d0b8c3"))
-	draw_rect(Rect2(394, 21, 192, 12), Color("#342f37"))
-	draw_rect(Rect2(394, 21, 192.0 * float(door_health) / balance.room.door_max_health, 12), Color("#a06a6a"))
-	draw_string(font, Vector2(394, 50), "ENTRY BARRIER  %d / %d" % [door_health, balance.room.door_max_health], HORIZONTAL_ALIGNMENT_LEFT, 205, 12, Color("#a99ba4"))
+	draw_string(font, Vector2(24, 134), "POWER %s   EXIT %s%s" % ["2/2" if _objectives_done() else ("1/2" if objectives_complete[0] or objectives_complete[1] else "0/2"), "OPEN" if _objectives_done() else "LOCKED", objective_progress], HORIZONTAL_ALIGNMENT_LEFT, 490, 12, Color("#d0b8c3"))
+	draw_rect(Rect2(24, 148, 492, 8), Color("#342f37"))
+	draw_rect(Rect2(24, 148, 492.0 * float(door_health) / balance.room.door_max_health, 8), Color("#a06a6a"))
 	var hunter_speed_label := "SPRINT" if hunter_ability_time > 0.0 else "READY" if hunter_ability_cooldown <= 0.0 else "COOLDOWN %02d" % ceili(hunter_ability_cooldown)
-	draw_string(font, Vector2(394, 72), "HUNTER ABILITY  %s" % hunter_speed_label, HORIZONTAL_ALIGNMENT_LEFT, 205, 12, Color("#c989a4"))
+	draw_string(font, Vector2(24, 174), "BARRIER %d/%d" % [door_health, balance.room.door_max_health], HORIZONTAL_ALIGNMENT_LEFT, 210, 11, Color("#a99ba4"))
+	draw_string(font, Vector2(250, 174), "HUNTER  %s" % hunter_speed_label, HORIZONTAL_ALIGNMENT_LEFT, 265, 11, Color("#c989a4"))
 	var health_bar_value: float = float(hunter_health) / float(balance.hunter.max_health) if selected_role == ROLE_HUNTER else float(survivor_health) / float(balance.survivor.max_health)
 	var health_bar_color := Color("#c989a4") if selected_role == ROLE_HUNTER else Color("#719c89")
-	draw_rect(Rect2(394, 88, 192, 8), Color("#342f37"))
-	draw_rect(Rect2(394, 88, 192.0 * health_bar_value, 8), health_bar_color)
-	var health_title := "HUNTER HEALTH" if selected_role == ROLE_HUNTER else "YOU HEALTH"
+	draw_rect(Rect2(24, 98, 492, 5), Color("#342f37"))
+	draw_rect(Rect2(24, 98, 492.0 * health_bar_value, 5), health_bar_color)
+	var health_title := "HUNTER" if selected_role == ROLE_HUNTER else "YOU"
 	var health_max: int = int(balance.hunter.max_health if selected_role == ROLE_HUNTER else balance.survivor.max_health)
 	var health_current := hunter_health if selected_role == ROLE_HUNTER else survivor_health
-	draw_string(font, Vector2(394, 112), "%s  %d / %d" % [health_title, health_current, health_max], HORIZONTAL_ALIGNMENT_LEFT, 205, 12, health_bar_color)
-	draw_string(font, Vector2(394, 134), _hunter_target_label(), HORIZONTAL_ALIGNMENT_LEFT, 205, 12, Color("#c989a4"))
 	var action_label := "SPRINT" if selected_role == ROLE_HUNTER else "INTERACT"
-	_draw_button(Rect2(748, 386, 190, 60), "ATTACK", Color("#6c334d"))
-	_draw_button(Rect2(748, 456, 190, 60), action_label, Color("#42504e"))
-	if selected_role == ROLE_HUNTER:
-		draw_string(font, Vector2(100, 515), "HUNT THE SURVIVORS  /  ATTACK NEARBY  /  SPRINT TO CLOSE DISTANCE", HORIZONTAL_ALIGNMENT_LEFT, 750, 14, Color("#c989a4"))
-	elif match_phase == PHASE_PREPARATION:
-		draw_string(font, Vector2(100, 515), "PREPARE: build defense or repair the entry before the Hunter arrives", HORIZONTAL_ALIGNMENT_LEFT, 630, 14, Color("#aa9da8"))
-	elif _nearby_rescue_available():
-		draw_string(font, Vector2(100, 515), "RESCUE ALLY  /  INTERACT (%d ENERGY)" % balance["match"]["rescue_cost"], HORIZONTAL_ALIGNMENT_LEFT, 630, 14, Color("#c3aa7a"))
-	elif turret_built and not ward_built:
-		draw_string(font, Vector2(100, 515), "BUILD SHOCK WARD (%d ENERGY) OR ACTIVATE POWER POINTS" % balance.room.ward_cost, HORIZONTAL_ALIGNMENT_LEFT, 630, 14, Color("#c3aa7a"))
-	elif turret_built:
-		draw_string(font, Vector2(100, 515), "DEFENSES ONLINE  /  Activate both hallway power points to unlock the exit", HORIZONTAL_ALIGNMENT_LEFT, 630, 14, Color("#c3aa7a"))
-	else:
-		draw_string(font, Vector2(100, 515), "Build defense in your room (%d energy), then activate both hallway power points" % balance.room.turret_cost, HORIZONTAL_ALIGNMENT_LEFT, 630, 14, Color("#aa9da8"))
+	_draw_button(ATTACK_BUTTON, "ATTACK", Color("#6c334d"))
+	_draw_button(INTERACT_BUTTON, action_label, Color("#42504e"))
+	var hint := "HUNT SURVIVORS  /  ATTACK  /  SPRINT" if selected_role == ROLE_HUNTER else "MOVE TO POWER NODES  /  ACTIVATE BOTH TO UNLOCK EXIT"
+	if selected_role == ROLE_SURVIVOR and match_phase == PHASE_PREPARATION:
+		hint = "PREPARE: BUILD DEFENSE OR REPAIR THE ENTRY"
+	elif selected_role == ROLE_SURVIVOR and _nearby_rescue_available():
+		hint = "RESCUE ALLY  /  INTERACT (%d ENERGY)" % balance["match"]["rescue_cost"]
+	elif selected_role == ROLE_SURVIVOR and turret_built and not ward_built:
+		hint = "BUILD SHOCK WARD (%d ENERGY) OR ACTIVATE POWER" % balance.room.ward_cost
+	draw_string(font, Vector2(24, 753), "%s %d/%d  /  %s" % [health_title, health_current, health_max, _hunter_target_label()], HORIZONTAL_ALIGNMENT_CENTER, 492, 11, health_bar_color)
+	draw_string(font, Vector2(24, 775), hint, HORIZONTAL_ALIGNMENT_CENTER, 492, 12, Color("#c3aa7a"))
 	_draw_joystick()
 	if game_over:
-		draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color(0, 0, 0, 0.72))
-		draw_string(font, Vector2(210, 240), result_text, HORIZONTAL_ALIGNMENT_CENTER, 540, 30, Color("#efc9d2"))
-		draw_string(font, Vector2(220, 275), result_detail, HORIZONTAL_ALIGNMENT_CENTER, 520, 14, Color("#c9bdc7"))
-		draw_string(font, Vector2(280, 315), "TAP INTERACT OR PRESS E TO RESTART", HORIZONTAL_ALIGNMENT_CENTER, 400, 15, Color("#c9bdc7"))
+		draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color(0, 0, 0, 0.76))
+		draw_string(font, Vector2(28, 432), result_text, HORIZONTAL_ALIGNMENT_CENTER, 484, 25, Color("#efc9d2"))
+		draw_string(font, Vector2(30, 470), result_detail, HORIZONTAL_ALIGNMENT_CENTER, 480, 12, Color("#c9bdc7"))
+		_draw_button(INTERACT_BUTTON, "PLAY AGAIN", Color("#6c5864"))
 
 func _draw_setup_screen() -> void:
 	draw_rect(Rect2(Vector2.ZERO, MAP_SIZE), Color("#121318"))
-	draw_string(font, Vector2(210, 90), "NIGHTTERROR", HORIZONTAL_ALIGNMENT_CENTER, 540, 34, Color("#dfc7d0"))
-	draw_string(font, Vector2(210, 125), "OFFLINE NIGHT SHIFT", HORIZONTAL_ALIGNMENT_CENTER, 540, 15, Color("#a89da8"))
-	draw_string(font, Vector2(210, 180), "SELECT YOUR ROLE", HORIZONTAL_ALIGNMENT_CENTER, 540, 19, Color("#d0b8c3"))
+	draw_string(font, Vector2(20, 150), "NIGHTTERROR", HORIZONTAL_ALIGNMENT_CENTER, 500, 34, Color("#dfc7d0"))
+	draw_string(font, Vector2(20, 184), "OFFLINE NIGHT SHIFT", HORIZONTAL_ALIGNMENT_CENTER, 500, 15, Color("#a89da8"))
+	draw_string(font, Vector2(20, 260), "SELECT YOUR ROLE", HORIZONTAL_ALIGNMENT_CENTER, 500, 19, Color("#d0b8c3"))
 	var survivor_color := Color("#719c89") if selected_role == ROLE_SURVIVOR else Color("#42504e")
 	var hunter_color := Color("#a43b67") if selected_role == ROLE_HUNTER else Color("#593243")
-	_draw_button(Rect2(110, 245, 300, 80), "1  SURVIVOR", survivor_color)
-	_draw_button(Rect2(550, 245, 300, 80), "2  HUNTER", hunter_color)
-	draw_string(font, Vector2(140, 355), "SURVIVOR: lead the team, power both nodes, and escape", HORIZONTAL_ALIGNMENT_LEFT, 680, 13, Color("#b9d2ce"))
-	draw_string(font, Vector2(140, 378), "HUNTER: pursue the team, break the entry, and stop four escapes", HORIZONTAL_ALIGNMENT_LEFT, 680, 13, Color("#c989a4"))
-	_draw_button(Rect2(320, 410, 320, 70), "START MATCH", Color("#6c5864"))
-	draw_string(font, Vector2(280, 515), "KEYBOARD: 1 / 2 SELECT   ENTER OR E START", HORIZONTAL_ALIGNMENT_CENTER, 400, 13, Color("#a89da8"))
+	_draw_button(SETUP_SURVIVOR_BUTTON, "1  SURVIVOR", survivor_color)
+	_draw_button(SETUP_HUNTER_BUTTON, "2  HUNTER", hunter_color)
+	draw_string(font, Vector2(30, 565), "SURVIVOR: lead the team, power both nodes, and escape", HORIZONTAL_ALIGNMENT_CENTER, 480, 13, Color("#b9d2ce"))
+	draw_string(font, Vector2(30, 598), "HUNTER: pursue the team, break the entry, and stop four escapes", HORIZONTAL_ALIGNMENT_CENTER, 480, 13, Color("#c989a4"))
+	_draw_button(SETUP_START_BUTTON, "START MATCH", Color("#6c5864"))
+	draw_string(font, Vector2(30, 828), "KEYBOARD: 1 / 2 SELECT   ENTER OR E START", HORIZONTAL_ALIGNMENT_CENTER, 480, 13, Color("#a89da8"))
 
 func _draw_button(rect: Rect2, label: String, color: Color) -> void:
 	draw_rect(rect, Color(0.02, 0.02, 0.03, 0.84))
@@ -836,7 +848,7 @@ func _draw_button(rect: Rect2, label: String, color: Color) -> void:
 	draw_string(font, rect.position + Vector2(0, 37), label, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, 18, Color("#f1e6ec"))
 
 func _draw_joystick() -> void:
-	var center := stick_origin if stick_touch != -1 or (stick_origin != Vector2.ZERO and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) else Vector2(126, 412)
+	var center := stick_origin if stick_touch != -1 or (stick_origin != Vector2.ZERO and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) else Vector2(JOYSTICK_TOUCH_AREA.position.x + 126, JOYSTICK_TOUCH_AREA.position.y + 62)
 	draw_circle(center, 58, Color(0.85, 0.84, 0.9, 0.09))
 	draw_circle(center + move_input * 31.0, 22, Color(0.82, 0.8, 0.86, 0.24))
 

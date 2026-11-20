@@ -20,8 +20,9 @@
 - Offline team-mode source checks verify seven total Survivors, six bots, proximity-gated objective channeling, damage interruption, bot flee behavior, nearest-active-target selection, individual elimination, bot defense attacks, rescue state reset, two player defenses, Hunter sprint and stun state, hunt timeout result, combat target/health HUD, result detail display, four-escape victory, full-team elimination, and restart state reset; balance JSON validation, simulation checks, and `git diff --check` passed.
 - Offline role checks verify the setup phase exists, both role constants are wired, keyboard (1/2) and touch role selection work only during setup, the touch start hitbox matches the drawn Start button, Hunter movement is gated while stunned, `_hunter_attack_nearby` exists with the stun gate, `_begin_match` transitions SETUP to PREPARATION with fresh timers, `_reset_match` clears `primary_objective_time`/`primary_attack_time`, HUD role/health/target labels adapt to the selected role, restart returns to setup, and no unsupported draw calls or direct Hunter position writes remain; 12/12 wiring checks and 13/13 gameplay invariants pass.
 - GitHub Actions run 44712936748 successfully parsed the project, exported and signed both ARMv7 and ARM64 APKs, and verified both files. The user installed the ARMv7 APK; it showed the Godot splash and then a black screen.
-- The project canvas is 960×540 landscape, but the project and both Android export presets selected portrait. They now select landscape. Startup reports missing or invalid balance JSON on-screen instead of silently returning, and the validation workflow requires a headless `NIGHTTERROR_READY` marker.
-- The updated orientation and startup diagnostics have not yet been run through CI or tested on-device. Termux cannot read the app's Android logs or capture the display, so the exact original runtime failure is not confirmed. No new APK is being uploaded or released while the startup issue is under investigation.
+- The project viewport and both Android export presets use portrait orientation at 540×960. World geometry, room traversal, objectives, exit, player/Hunter/bot spawns, defenses, setup choices, HUD, result overlay, joystick, and touch controls have been converted to portrait coordinates; setup/action controls share drawing and touch-hitbox constants.
+- Static portrait checks, six-bot doorway-to-objective-to-exit navigation, Hunter/exit separation, HUD/control bounds and spacing, `git diff --check`, `data/balance.json` parsing, gdtoolkit parsing of `main.gd`, and workflow YAML parsing pass. `gdlint` reports only long-line and `_interact` return-count style rules, which are also present in the committed baseline. The validation-only workflow requires Godot parse/startup/first-frame markers and contains no APK export or upload. Godot is not installed in this Termux environment, so runtime validation must run in GitHub Actions. The GitHub token now has workflow scope; the validation workflow and portrait source changes are pending push.
+- The user-reported black screen has not been verified as fixed. Termux cannot read the app's Android logs or capture the display, so on-device rendering and touch behavior still need testing after source validation. APK export/upload remains paused.
 
 ### Known limitations
 
@@ -34,7 +35,7 @@
 
 ### Next
 
-1. Run the headless startup validation after the orientation and startup-diagnostic changes; do not generate or upload APKs until it passes.
-2. Rebuild and reinstall ARMv7 on the affected device only after startup validation passes, then verify the landscape UI and match start.
-3. Capture Android runtime logs if the app still fails after the orientation fix; Termux currently cannot read the app's logs.
+1. Run the validation-only headless startup workflow; do not generate or upload APKs until parsing, startup, and first-frame checks pass.
+2. After source validation, make an unpublished test build and verify portrait rendering, safe areas, touch alignment, and match start on the affected device.
+3. Capture Android runtime logs if the app still fails; Termux currently cannot read the app's logs.
 4. Add broader offline match systems only after the current slice is runtime-validated.
