@@ -1,0 +1,51 @@
+name: Build Android APKs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.3
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q Godot_v4.3-stable_linux.x86_64.zip
+          chmod +x Godot_v4.3-stable_linux.x86_64
+
+      - name: Install Android export templates
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip -q Godot_v4.3-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Export ARMv7 APK
+        run: |
+          ./Godot_v4.3-stable_linux.x86_64 --headless --export-release "Android ARMv7" build/NIGHTTERROR-armv7.apk
+        env:
+          GODOT_ANDROID_SDK_ROOT: /opt/android-sdk
+
+      - name: Export ARM64 APK
+        run: |
+          ./Godot_v4.3-stable_linux.x86_64 --headless --export-release "Android ARM64" build/NIGHTTERROR-arm64.apk
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightterror-apks
+          path: build/*.apk
